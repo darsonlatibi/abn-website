@@ -1,12 +1,19 @@
-import express from "express";
+﻿import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+
+import path from "path";
+import { fileURLToPath } from "url";
 
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.js";
 
 import EmailRoute from "./routes/EmailRoute.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDist = path.resolve(__dirname, "../../client/dist");
 
 const app = express();
 
@@ -86,12 +93,7 @@ app.use(morgan("dev"));
    ========================================================= */
 
 app.get("/", (_req, res) => {
-  res.json({
-    success: true,
-    service: "ABN MAIL API",
-    status: "ONLINE",
-    message: "ABN Mail API is running.",
-  });
+  res.sendFile(path.join(clientDist, "index.html"));
 });
 
 /* =========================================================
@@ -101,7 +103,7 @@ app.get("/", (_req, res) => {
 app.get("/health", (_req, res) => {
   res.json({
     success: true,
-    service: "ABN MAIL SERVER",
+    service: "ABN COMPANY WEBSITE",
     status: "ONLINE",
     timestamp: new Date().toISOString(),
   });
@@ -114,7 +116,7 @@ app.get("/health", (_req, res) => {
 app.get("/api/health", (_req, res) => {
   res.json({
     success: true,
-    service: "ABN MAIL API",
+    service: "ABN COMPANY WEBSITE API",
     status: "ONLINE",
     timestamp: new Date().toISOString(),
   });
@@ -127,10 +129,24 @@ app.get("/api/health", (_req, res) => {
 app.get("/api", (_req, res) => {
   res.json({
     success: true,
-    name: "ABN Mail API",
+    name: "ABN COMPANY WEBSITE API",
     version: "1.0.0",
     status: "ONLINE",
   });
+});
+
+/* =========================================================
+   REACT WEBSITE
+   ========================================================= */
+
+app.use(express.static(clientDist));
+
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api") || req.path === "/health") {
+    return next();
+  }
+
+  res.sendFile(path.join(clientDist, "index.html"));
 });
 
 /* =========================================================
@@ -151,7 +167,7 @@ app.use((req, res) => {
 
 app.use((error, _req, res, _next) => {
   console.error("==============================================");
-  console.error("ABN MAIL API ERROR");
+  console.error("ABN COMPANY WEBSITE API ERROR");
   console.error("==============================================");
   console.error(error);
   console.error("==============================================");
