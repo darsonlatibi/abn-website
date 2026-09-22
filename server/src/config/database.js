@@ -4,6 +4,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 /* =========================================================
+   ABN WEBSITE
+   DATABASE CONFIGURATION
+   ========================================================= */
+
+/* =========================================================
    LOAD ENV
    ========================================================= */
 
@@ -52,7 +57,25 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   logging: false,
 });
 
+/* =========================================================
+   EXPORTS
+   ========================================================= */
+
+/*
+ * Named export
+ *
+ * Digunakan oleh:
+ * import { sequelize } from "../config/database.js";
+ */
 export { sequelize };
+
+/*
+ * Default export
+ *
+ * Digunakan oleh model seperti:
+ * import db from "../config/database.js";
+ */
+export default sequelize;
 
 /* =========================================================
    DATABASE CONNECTION

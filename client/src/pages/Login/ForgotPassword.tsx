@@ -163,7 +163,7 @@ function ForgotPassword() {
             />
           </div>
 
-          <h1>PT. SEMEN TONASA (PERSERO)</h1>
+          <h1>PT Agro Berkah Nusantara</h1>
 
           <p>Kokoh, Kuat, Terpercaya</p>
         </div>

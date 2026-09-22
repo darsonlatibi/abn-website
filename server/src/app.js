@@ -3,6 +3,11 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 
+import cookieParser from "cookie-parser";
+import authRoutes from "./routes/authRoutes.js";
+
+import EmailRoute from "./routes/EmailRoute.js";
+
 const app = express();
 
 /* =========================================================
@@ -60,6 +65,15 @@ app.use(
     limit: "10mb",
   }),
 );
+
+app.use(cookieParser());
+
+/* =========================================================
+   AUTH
+   ========================================================= */
+
+app.use("/api/auth", authRoutes);
+app.use("/api/email", EmailRoute);
 
 /* =========================================================
    LOGGER

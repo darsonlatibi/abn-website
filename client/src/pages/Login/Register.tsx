@@ -1,27 +1,31 @@
 import { useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, ChangeEvent } from "react";
+
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
 import type { AppDispatch, RootState } from "../../stores/store";
-
 import { register } from "../../features/auth/authSlice";
+
 import logo from "../../assets/logo.png";
+
 import "./Register.css";
 
 /* =========================================================
-   ABN FLEET SYSTEM
+   ABN ENTERPRISE MANAGEMENT SYSTEM
    REGISTER PAGE
    ========================================================= */
 
 const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+
   /* =======================================================
      FORM STATE
      ======================================================= */
 
   const [formData, setFormData] = useState({
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -37,7 +41,7 @@ const Register = () => {
      INPUT HANDLER
      ======================================================= */
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
@@ -53,10 +57,6 @@ const Register = () => {
      REGISTER
      ======================================================= */
 
-  /* =======================================================
-   REGISTER
-   ======================================================= */
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -67,15 +67,37 @@ const Register = () => {
     setError("");
     setSuccess("");
 
+    const username = formData.username.trim().toLowerCase();
     const email = formData.email.trim().toLowerCase();
     const full_name = formData.full_name.trim();
-
     const password = formData.password;
     const confirmPassword = formData.confirmPassword;
 
     /* =====================================================
-     VALIDATION
-     ===================================================== */
+       VALIDATION
+       ===================================================== */
+
+    if (!username) {
+      setError("Username wajib diisi.");
+      return;
+    }
+
+    if (username.length < 3) {
+      setError("Username minimal 3 karakter.");
+      return;
+    }
+
+    if (username.length > 100) {
+      setError("Username maksimal 100 karakter.");
+      return;
+    }
+
+    if (!/^[a-z0-9._-]+$/.test(username)) {
+      setError(
+        "Username hanya boleh menggunakan huruf kecil, angka, titik, underscore, dan tanda minus.",
+      );
+      return;
+    }
 
     if (!full_name) {
       setError("Nama lengkap wajib diisi.");
@@ -92,8 +114,8 @@ const Register = () => {
       return;
     }
 
-    if (email.length > 150) {
-      setError("Email maksimal 150 karakter.");
+    if (email.length > 191) {
+      setError("Email maksimal 191 karakter.");
       return;
     }
 
@@ -109,8 +131,8 @@ const Register = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password minimal 6 karakter.");
+    if (password.length < 8) {
+      setError("Password minimal 8 karakter.");
       return;
     }
 
@@ -120,12 +142,13 @@ const Register = () => {
     }
 
     /* =====================================================
-     SUBMIT REDUX
-     ===================================================== */
+       SUBMIT REDUX
+       ===================================================== */
 
     try {
       const result = await dispatch(
         register({
+          username,
           email,
           password,
           full_name,
@@ -135,6 +158,7 @@ const Register = () => {
       setSuccess(result.message || "Registrasi berhasil.");
 
       setFormData({
+        username: "",
         email: "",
         password: "",
         confirmPassword: "",
@@ -168,12 +192,16 @@ const Register = () => {
 
         <div className="register-header">
           <div className="register-logo-wrapper">
-            <img src={logo} alt="ABN Fleet System" className="register-logo" />
+            <img
+              src={logo}
+              alt="ABN Enterprise Management System"
+              className="register-logo"
+            />
           </div>
 
-          <h1>PT. SEMEN TONASA (PERSERO)</h1>
+          <h1>ABN ENTERPRISE MANAGEMENT SYSTEM</h1>
 
-          <p>Kokoh, Kuat, Terpercaya</p>
+          <p>Integrated Business Management</p>
 
           <span className="register-subtitle">Buat akun baru</span>
         </div>
@@ -203,6 +231,25 @@ const Register = () => {
             ================================================= */}
 
         <form onSubmit={handleSubmit} autoComplete="off">
+          {/* USERNAME */}
+
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+
+            <input
+              id="username"
+              name="username"
+              type="text"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Masukkan username"
+              maxLength={100}
+              autoComplete="username"
+              disabled={authLoading}
+              required
+            />
+          </div>
+
           {/* FULL NAME */}
 
           <div className="form-group">
@@ -234,7 +281,7 @@ const Register = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Masukkan email"
-              maxLength={150}
+              maxLength={191}
               autoComplete="email"
               disabled={authLoading}
               required
@@ -252,7 +299,7 @@ const Register = () => {
               type="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Minimal 6 karakter"
+              placeholder="Minimal 8 karakter"
               autoComplete="new-password"
               disabled={authLoading}
               required

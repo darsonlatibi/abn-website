@@ -1,15 +1,17 @@
 import { useState } from "react";
-
 import type { FormEvent } from "react";
-
 import { useDispatch } from "react-redux";
-
-import { LockKeyhole, LogIn, Mail, UserPlus, Handshake } from "lucide-react";
-
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  LockKeyhole,
+  LogIn,
+  Mail,
+  UserPlus,
+  Handshake,
+  KeyRound,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 import type { AppDispatch } from "../../stores/store";
-
 import { login } from "../../features/auth/authSlice";
 
 import logo from "../../assets/logo.png";
@@ -23,8 +25,6 @@ import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
-  const location = useLocation();
-
   const dispatch = useDispatch<AppDispatch>();
 
   /* =======================================================
@@ -91,27 +91,17 @@ function Login() {
         }),
       ).unwrap();
 
-      console.log("ABN LOGIN SUCCESS:", result);
+      console.log("========================================");
+      console.log("ABN LOGIN SUCCESS");
+      console.log("USER:", result.user);
+      console.log("========================================");
 
       /* ===================================================
-         REDIRECT TO ORIGINAL PAGE
+         LOGIN BERHASIL
+         LANGSUNG KE DASHBOARD
          =================================================== */
 
-      const routeState = location.state as {
-        from?: {
-          pathname?: string;
-          search?: string;
-          hash?: string;
-        };
-      } | null;
-
-      const from = routeState?.from;
-
-      const redirectTo = from?.pathname
-        ? `${from.pathname}${from.search || ""}${from.hash || ""}`
-        : "/dashboard";
-
-      navigate(redirectTo, {
+      navigate("/dashboard", {
         replace: true,
       });
     } catch (err) {
@@ -137,7 +127,7 @@ function Login() {
             <img src={logo} alt="ABN Digital & Industrial Technology" />
           </div>
 
-          <h1>ABN DIGITAL & INDUSTRIAL TECHNOLOGY</h1>
+          <h1>PT. Agro Berkah Nusantara</h1>
 
           <p>Enterprise & Industrial Solutions</p>
         </div>
@@ -207,11 +197,16 @@ function Login() {
               </button>
             </div>
 
-            {/* FORGOT PASSWORD */}
+            {/* PASSWORD ACTIONS */}
 
             <div className="forgot-password-wrapper">
               <Link to="/forgot-password" className="forgot-password-link">
                 Lupa Password?
+              </Link>
+
+              <Link to="/change-password" className="change-password-link">
+                <KeyRound size={14} aria-hidden="true" />
+                Change Password
               </Link>
             </div>
           </div>

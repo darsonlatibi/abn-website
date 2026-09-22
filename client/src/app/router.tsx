@@ -36,6 +36,7 @@ import Register from "../pages/Login/Register";
 import ForgotPassword from "../pages/Login/ForgotPassword";
 import ResetPassword from "../pages/Login/ResetPassword";
 import Compose from "../pages/mail/Compose";
+import ChangePassword from "../pages/Login/ChangePassword";
 
 /* =========================================================
    ABN CORPORATE WEBSITE
@@ -53,6 +54,7 @@ function AppRouter() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route path="/" element={<Home />} />
