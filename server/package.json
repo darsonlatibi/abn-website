@@ -1,0 +1,36 @@
+{
+  "name": "abn-website-server",
+  "version": "1.0.0",
+  "description": "ABN Digital & Industrial Technology Mail API",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": [
+    "abn",
+    "mail",
+    "smtp",
+    "imap",
+    "webmail"
+  ],
+  "author": "ABN Digital & Industrial Technology",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.24.4",
+    "nodemailer": "^7.0.6",
+    "sequelize": "^6.37.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

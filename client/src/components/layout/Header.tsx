@@ -1,0 +1,845 @@
+import {
+  ArrowRight,
+  BarChart3,
+  ChevronDown,
+  Cloud,
+  Code2,
+  Database,
+  Factory,
+  Gauge,
+  // Mail,
+  Menu,
+  Moon,
+  Network,
+  Radio,
+  Satellite,
+  ServerCog,
+  Settings2,
+  Sun,
+  Truck,
+  User,
+  X,
+} from "lucide-react";
+
+import { useEffect, useRef, useState } from "react";
+import type { ComponentType } from "react";
+
+import { useDispatch, useSelector } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
+
+import logo from "../../assets/logo.png";
+
+import type { AppDispatch, RootState } from "../../stores/store";
+
+import {
+  logout,
+  selectAuthUser,
+  selectAuthenticated,
+} from "../../features/auth/authSlice";
+
+import "./Header.css";
+
+/* =========================================================
+   ABN CORPORATE WEBSITE
+   PUBLIC COMPANY HEADER
+   LIGHT / DARK THEME
+   MEGA MENU + MOBILE ACCORDION
+   AUTHENTICATION
+   ADMIN MAIL
+   ========================================================= */
+
+type NavigationChild = {
+  label: string;
+  path?: string;
+  icon?: ComponentType<{
+    size?: number;
+    strokeWidth?: number;
+  }>;
+  description?: string;
+  children?: NavigationChild[];
+};
+
+type NavigationItem = {
+  label: string;
+  path: string;
+  children?: NavigationChild[];
+};
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+const getNavigation = (
+  user: ReturnType<typeof selectAuthUser>,
+): NavigationItem[] => {
+  const role = user?.role?.toUpperCase();
+
+  const canAccessMailbox = role === "ADMIN" || role === "SUPER_ADMIN";
+
+  return [
+    {
+      label: "Home",
+      path: "/home",
+    },
+
+    {
+      label: "Tentang Kami",
+      path: "/about",
+    },
+
+    /* =====================================================
+       LAYANAN
+       ===================================================== */
+
+    {
+      label: "Layanan",
+      path: "/layanan",
+
+      children: [
+        {
+          label: "Digital & Software",
+
+          children: [
+            {
+              label: "Web & Software Development",
+              path: "/layanan/software-development",
+              icon: Code2,
+            },
+            {
+              label: "System Integration",
+              path: "/layanan/system-integration",
+              icon: Network,
+            },
+            {
+              label: "Data & Analytics",
+              path: "/layanan/data-analytics",
+              icon: BarChart3,
+            },
+          ],
+        },
+
+        {
+          label: "Industrial Technology",
+
+          children: [
+            {
+              label: "Industrial IoT",
+              path: "/layanan/industrial-iot",
+              icon: Radio,
+            },
+            {
+              label: "Industrial Automation",
+              path: "/layanan/industrial-automation",
+              icon: Settings2,
+            },
+            {
+              label: "SCADA & Monitoring",
+              path: "/layanan/scada-monitoring",
+              icon: Gauge,
+            },
+            {
+              label: "IoT Hardware & Sensor",
+              path: "/layanan/iot-hardware",
+              icon: Factory,
+            },
+          ],
+        },
+
+        {
+          label: "Fleet & Mobility",
+
+          children: [
+            {
+              label: "Fleet Management",
+              path: "/layanan/fleet-management",
+              icon: Truck,
+            },
+            {
+              label: "GPS Tracking",
+              path: "/layanan/gps-tracking",
+              icon: Satellite,
+            },
+          ],
+        },
+
+        {
+          label: "Infrastructure",
+
+          children: [
+            {
+              label: "Cloud & Infrastructure",
+              path: "/layanan/cloud-infrastructure",
+              icon: Cloud,
+            },
+            {
+              label: "Industrial Data Infrastructure",
+              path: "/layanan/data-infrastructure",
+              icon: Database,
+            },
+            {
+              label: "Server & Network",
+              path: "/layanan/server-network",
+              icon: ServerCog,
+            },
+          ],
+        },
+      ],
+    },
+
+    /* =====================================================
+       PORTFOLIO
+       ===================================================== */
+
+    {
+      label: "Portfolio",
+      path: "/portfolio",
+    },
+
+    /* =====================================================
+       BLOG
+       ===================================================== */
+
+    {
+      label: "Blog",
+      path: "/blog",
+    },
+
+    /* =====================================================
+       KONTAK
+       ===================================================== */
+
+    {
+      label: "Kontak",
+      path: "/contact",
+    },
+
+    /* =====================================================
+   ADMIN ONLY — MAILBOX
+   ===================================================== */
+
+    ...(canAccessMailbox
+      ? [
+          {
+            label: "Mailbox",
+            path: "/mail/inbox",
+          },
+        ]
+      : []),
+  ];
+};
+
+/* =========================================================
+   THEME TYPE
+   ========================================================= */
+
+type Theme = "light" | "dark";
+
+/* =========================================================
+   THEME STORAGE
+   ========================================================= */
+
+const THEME_STORAGE_KEY = "abn-theme";
+
+/* =========================================================
+   INITIAL THEME
+   ========================================================= */
+
+const getInitialTheme = (): Theme => {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+
+  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+
+  if (savedTheme === "dark" || savedTheme === "light") {
+    return savedTheme;
+  }
+
+  return "light";
+};
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+function Header() {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+
+  /* =======================================================
+     AUTH
+     ======================================================= */
+
+  const authenticated = useSelector((state: RootState) =>
+    selectAuthenticated(state),
+  );
+
+  const user = useSelector((state: RootState) => selectAuthUser(state));
+
+  /* =======================================================
+     NAVIGATION
+     ======================================================= */
+
+  const navigation = getNavigation(user);
+
+  /* =======================================================
+     UI STATE
+     ======================================================= */
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+
+  const [desktopServicesOpen, setDesktopServicesOpen] = useState(false);
+
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
+
+  /* =======================================================
+     DESKTOP CLOSE TIMER
+     ======================================================= */
+
+  const desktopCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /* =======================================================
+     CLEAR DESKTOP TIMER
+     ======================================================= */
+
+  const clearDesktopCloseTimer = () => {
+    if (desktopCloseTimer.current) {
+      clearTimeout(desktopCloseTimer.current);
+
+      desktopCloseTimer.current = null;
+    }
+  };
+
+  /* =======================================================
+     OPEN DESKTOP SERVICES
+     ======================================================= */
+
+  const openDesktopServices = () => {
+    clearDesktopCloseTimer();
+
+    setDesktopServicesOpen(true);
+  };
+
+  /* =======================================================
+     CLOSE DESKTOP SERVICES
+     ======================================================= */
+
+  const closeDesktopServices = () => {
+    clearDesktopCloseTimer();
+
+    desktopCloseTimer.current = setTimeout(() => {
+      setDesktopServicesOpen(false);
+
+      desktopCloseTimer.current = null;
+    }, 180);
+  };
+
+  /* =======================================================
+     CLEANUP
+     ======================================================= */
+
+  useEffect(() => {
+    return () => {
+      clearDesktopCloseTimer();
+    };
+  }, []);
+
+  /* =======================================================
+     APPLY THEME
+     ======================================================= */
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  /* =======================================================
+     CLOSE MOBILE MENU
+     ======================================================= */
+
+  const closeMobileMenu = () => {
+    setMobileOpen(false);
+    setMobileServicesOpen(false);
+  };
+
+  /* =======================================================
+     MOBILE MENU
+     ======================================================= */
+
+  const toggleMobileMenu = () => {
+    setMobileOpen((current) => {
+      const next = !current;
+
+      if (next) {
+        clearDesktopCloseTimer();
+        setDesktopServicesOpen(false);
+      }
+
+      return next;
+    });
+  };
+
+  /* =======================================================
+     MOBILE SERVICES
+     ======================================================= */
+
+  const toggleMobileServices = () => {
+    setMobileServicesOpen((current) => !current);
+  };
+
+  /* =======================================================
+     THEME
+     ======================================================= */
+
+  const toggleTheme = () => {
+    setTheme((current) => (current === "light" ? "dark" : "light"));
+  };
+
+  const isLightTheme = theme === "light";
+
+  /* =======================================================
+     LOGOUT
+     ======================================================= */
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+
+      console.log("ABN WEBSITE LOGOUT: success");
+    } catch (error) {
+      console.error("ABN WEBSITE LOGOUT ERROR:", error);
+    } finally {
+      closeMobileMenu();
+
+      navigate("/login", {
+        replace: true,
+      });
+    }
+  };
+
+  /* =======================================================
+     USER DISPLAY
+     ======================================================= */
+
+  const displayName =
+    user?.full_name || user?.username || user?.email || "Account";
+
+  return (
+    <header className="website-header">
+      <div className="website-header-inner">
+        {/* =================================================
+            BRAND
+            ================================================= */}
+
+        <NavLink
+          to="/"
+          className="website-brand"
+          onClick={closeMobileMenu}
+          aria-label="ABN Home"
+        >
+          <div className="website-brand-mark">
+            <img
+              src={logo}
+              alt="PT. Agro Berkah Nusantara"
+              className="website-brand-logo"
+            />
+          </div>
+
+          <div className="website-brand-text">
+            <strong>PT. AGRO BERKAH NUSANTARA</strong>
+
+            <span>ABN EMS & INDUSTRIAL INTELLIGENCE</span>
+          </div>
+        </NavLink>
+
+        {/* =================================================
+            DESKTOP NAVIGATION
+            ================================================= */}
+
+        <nav className="website-navigation" aria-label="Main navigation">
+          {navigation.map((item) => {
+            const hasChildren = item.children && item.children.length > 0;
+
+            if (hasChildren) {
+              return (
+                <div
+                  key={item.path}
+                  className={`website-nav-dropdown ${
+                    desktopServicesOpen ? "open" : ""
+                  }`}
+                  onMouseEnter={openDesktopServices}
+                  onMouseLeave={closeDesktopServices}
+                >
+                  <button
+                    type="button"
+                    className="website-nav-dropdown-trigger"
+                    onClick={() => {
+                      clearDesktopCloseTimer();
+
+                      setDesktopServicesOpen((current) => !current);
+                    }}
+                    aria-expanded={desktopServicesOpen}
+                  >
+                    <span>{item.label}</span>
+
+                    <ChevronDown
+                      size={15}
+                      strokeWidth={1.8}
+                      className="desktop-dropdown-icon"
+                    />
+                  </button>
+
+                  {/* MEGA MENU */}
+
+                  <div
+                    className="website-mega-menu"
+                    onMouseEnter={openDesktopServices}
+                    onMouseLeave={closeDesktopServices}
+                  >
+                    <div className="website-mega-menu-inner">
+                      <div className="website-mega-header">
+                        <div>
+                          <span className="website-mega-eyebrow">
+                            ABN SERVICES
+                          </span>
+
+                          <h3>Industrial Technology Solutions</h3>
+
+                          <p>
+                            Solusi digital, automation, IoT, fleet, dan
+                            infrastructure untuk transformasi industri.
+                          </p>
+                        </div>
+
+                        <NavLink
+                          to="/layanan"
+                          className="website-mega-view-all"
+                          onClick={() => {
+                            clearDesktopCloseTimer();
+                            setDesktopServicesOpen(false);
+                          }}
+                        >
+                          <span>Lihat Semua Layanan</span>
+
+                          <ArrowRight size={15} />
+                        </NavLink>
+                      </div>
+
+                      <div className="website-mega-grid">
+                        {item.children?.map((category) => (
+                          <div
+                            key={category.label}
+                            className="website-mega-column"
+                          >
+                            <div className="website-mega-column-title">
+                              {category.label}
+                            </div>
+
+                            <div className="website-mega-links">
+                              {category.children?.map((service) => {
+                                const Icon = service.icon;
+
+                                return (
+                                  <NavLink
+                                    key={service.path}
+                                    to={service.path || "#"}
+                                    className="website-mega-link"
+                                    onClick={() => {
+                                      clearDesktopCloseTimer();
+
+                                      setDesktopServicesOpen(false);
+                                    }}
+                                  >
+                                    <span className="website-mega-link-icon">
+                                      {Icon && (
+                                        <Icon size={17} strokeWidth={1.8} />
+                                      )}
+                                    </span>
+
+                                    <span className="website-mega-link-content">
+                                      <strong>{service.label}</strong>
+
+                                      <small>
+                                        {service.description ||
+                                          "Explore solution"}
+                                      </small>
+                                    </span>
+
+                                    <ArrowRight
+                                      size={14}
+                                      className="website-mega-link-arrow"
+                                    />
+                                  </NavLink>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `website-nav-link ${isActive ? "active" : ""}`
+                }
+                onClick={closeMobileMenu}
+              >
+                {item.label}
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        {/* =================================================
+            HEADER ACTIONS
+            ================================================= */}
+
+        <div className="website-header-actions">
+          {/* THEME */}
+
+          <button
+            type="button"
+            className="website-theme-button"
+            onClick={toggleTheme}
+            aria-label={
+              isLightTheme ? "Switch to dark mode" : "Switch to light mode"
+            }
+            title={isLightTheme ? "Dark mode" : "Light mode"}
+          >
+            {isLightTheme ? (
+              <Moon size={18} strokeWidth={2} />
+            ) : (
+              <Sun size={18} strokeWidth={2} />
+            )}
+          </button>
+
+          {/* AUTH */}
+
+          {authenticated ? (
+            <>
+              <span className="website-header-user" title={displayName}>
+                {displayName}
+              </span>
+
+              <button
+                type="button"
+                className="website-header-login"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <NavLink
+              to="/login"
+              className="website-header-login"
+              onClick={closeMobileMenu}
+            >
+              Log in
+            </NavLink>
+          )}
+
+          {/* CONTACT */}
+
+          <NavLink
+            to="/contact"
+            className="website-header-cta"
+            onClick={closeMobileMenu}
+          >
+            <span>Contact ABN</span>
+
+            <ArrowRight size={16} strokeWidth={2} />
+          </NavLink>
+
+          {/* MOBILE */}
+
+          <button
+            type="button"
+            className="website-mobile-button"
+            onClick={toggleMobileMenu}
+            aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={mobileOpen}
+            aria-controls="website-mobile-navigation"
+          >
+            {mobileOpen ? (
+              <X size={22} strokeWidth={2} />
+            ) : (
+              <Menu size={22} strokeWidth={2} />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* ===================================================
+          MOBILE NAVIGATION
+          =================================================== */}
+
+      <div
+        id="website-mobile-navigation"
+        className={`website-mobile-navigation ${mobileOpen ? "open" : ""}`}
+      >
+        <nav aria-label="Mobile navigation">
+          {navigation.map((item) => {
+            const hasChildren = item.children && item.children.length > 0;
+
+            if (hasChildren) {
+              return (
+                <div key={item.path} className="website-mobile-services">
+                  <button
+                    type="button"
+                    className={`website-mobile-nav-link website-mobile-services-trigger ${
+                      mobileServicesOpen ? "active" : ""
+                    }`}
+                    onClick={toggleMobileServices}
+                    aria-expanded={mobileServicesOpen}
+                  >
+                    <span>{item.label}</span>
+
+                    <ChevronDown
+                      size={17}
+                      strokeWidth={1.8}
+                      className={mobileServicesOpen ? "rotate" : ""}
+                    />
+                  </button>
+
+                  <div
+                    className={`website-mobile-services-content ${
+                      mobileServicesOpen ? "open" : ""
+                    }`}
+                  >
+                    <NavLink
+                      to="/layanan"
+                      className="website-mobile-service-all"
+                      onClick={closeMobileMenu}
+                    >
+                      <span>Semua Layanan</span>
+
+                      <ArrowRight size={15} />
+                    </NavLink>
+
+                    {item.children?.map((category) => (
+                      <div
+                        key={category.label}
+                        className="website-mobile-category"
+                      >
+                        <div className="website-mobile-category-title">
+                          {category.label}
+                        </div>
+
+                        {category.children?.map((service) => {
+                          const Icon = service.icon;
+
+                          return (
+                            <NavLink
+                              key={service.path}
+                              to={service.path || "#"}
+                              className="website-mobile-service"
+                              onClick={closeMobileMenu}
+                            >
+                              <span className="website-mobile-service-icon">
+                                {Icon && <Icon size={17} strokeWidth={1.8} />}
+                              </span>
+
+                              <span>{service.label}</span>
+
+                              <ArrowRight
+                                size={14}
+                                className="mobile-service-arrow"
+                              />
+                            </NavLink>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `website-mobile-nav-link ${isActive ? "active" : ""}`
+                }
+                onClick={closeMobileMenu}
+              >
+                <span>{item.label}</span>
+
+                <ArrowRight size={15} strokeWidth={1.8} />
+              </NavLink>
+            );
+          })}
+
+          {/* =================================================
+              MOBILE AUTH
+              ================================================= */}
+
+          {authenticated ? (
+            <>
+              <div className="website-mobile-user">
+                <User size={17} strokeWidth={1.8} />
+
+                <span>{displayName}</span>
+              </div>
+
+              <button
+                type="button"
+                className="website-mobile-nav-link"
+                onClick={handleLogout}
+              >
+                <span>Logout</span>
+
+                <ArrowRight size={15} strokeWidth={1.8} />
+              </button>
+            </>
+          ) : (
+            <NavLink
+              to="/login"
+              className="website-mobile-nav-link"
+              onClick={closeMobileMenu}
+            >
+              <span>Log in</span>
+
+              <ArrowRight size={15} strokeWidth={1.8} />
+            </NavLink>
+          )}
+
+          {/* =================================================
+              MOBILE THEME
+              ================================================= */}
+
+          <button
+            type="button"
+            className="website-mobile-theme"
+            onClick={toggleTheme}
+            aria-label={
+              isLightTheme ? "Switch to dark mode" : "Switch to light mode"
+            }
+          >
+            {isLightTheme ? (
+              <Moon size={17} strokeWidth={2} />
+            ) : (
+              <Sun size={17} strokeWidth={2} />
+            )}
+
+            <span>{isLightTheme ? "Dark Mode" : "Light Mode"}</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+export default Header;
