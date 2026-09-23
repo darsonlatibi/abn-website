@@ -36,6 +36,12 @@ const User = sequelize.define(
       allowNull: false,
     },
 
+    avatar: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      defaultValue: null,
+    },
+
     role: {
       type: DataTypes.ENUM(
         "SUPER_ADMIN",

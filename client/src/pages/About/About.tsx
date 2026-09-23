@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CementIndustry from "../../components/svg/CementIndustry";
 import "./About.css";
 
 const About: React.FC = () => {
@@ -180,6 +181,13 @@ const About: React.FC = () => {
           {/* HERO VISUAL */}
           <div className="about-hero-visual">
             <div className="about-system-card">
+              <div className="about-industry-background">
+                <CementIndustry
+                  width="100%"
+                  height="100%"
+                  className="about-cement-svg"
+                />
+              </div>
               <div className="about-system-header">
                 <div>
                   <span className="about-system-label">

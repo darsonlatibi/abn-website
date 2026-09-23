@@ -7,15 +7,41 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import cookieParser from "cookie-parser";
+
+import sequelize from "./config/database.js";
+
 import authRoutes from "./routes/authRoutes.js";
 
 import EmailRoute from "./routes/EmailRoute.js";
+import "./models/index.js";
+
+import userRoutes from "./routes/userRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const clientDist = path.resolve(__dirname, "../../client/dist");
 
 const app = express();
+
+/* ========================================================= 
+DATABASE / EMAIL TABLE ========================================================= */
+try {
+  await sequelize.authenticate();
+
+  await sequelize.sync();
+  console.log("==============================================");
+  console.log(" EMAIL DATABASE READY");
+  console.log(" Table: emails");
+  console.log(" Status: READY");
+  console.log("==============================================");
+} catch (error) {
+  console.error("==============================================");
+  console.error(" EMAIL DATABASE INIT FAILED");
+  console.error("==============================================");
+  console.error(error);
+  console.error("==============================================");
+  throw error;
+}
 
 /* =========================================================
    SECURITY
@@ -81,6 +107,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/email", EmailRoute);
+app.use("/api/users", userRoutes);
 
 /* =========================================================
    LOGGER

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Archive,
@@ -48,12 +48,6 @@ interface InboxProps {
   folder?: MailFolder;
 }
 
-/*
- * Folder yang saat ini didukung oleh emailSlice/backend.
- *
- * STARRED belum dikirim sebagai folder ke backend.
- * STARRED diproses sebagai filter di frontend.
- */
 type EmailApiFolder = "INBOX" | "SENT" | "ARCHIVE" | "TRASH";
 
 /* =========================================================
@@ -61,6 +55,7 @@ type EmailApiFolder = "INBOX" | "SENT" | "ARCHIVE" | "TRASH";
    ========================================================= */
 
 const MAILS_PER_PAGE = 25;
+const SEARCH_DEBOUNCE_MS = 400;
 
 /* =========================================================
    FOLDER META
@@ -119,10 +114,6 @@ const FOLDER_META: Record<
    ========================================================= */
 
 const getApiFolder = (folder: MailFolder): EmailApiFolder => {
-  /*
-   * STARRED sementara mengambil data INBOX,
-   * lalu email.starred difilter di frontend.
-   */
   if (folder === "STARRED") {
     return "INBOX";
   }
@@ -199,11 +190,8 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
 
   const emails = useSelector(selectEmails);
   const selectedEmail = useSelector(selectSelectedEmail);
-
   const loading = useSelector(selectEmailLoading);
-
   const error = useSelector(selectEmailError);
-
   const totalMessages = useSelector(selectEmailTotal);
 
   /* =======================================================
@@ -211,9 +199,7 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
      ======================================================= */
 
   const folderMeta = FOLDER_META[folder];
-
   const FolderIcon = folderMeta.icon;
-
   const apiFolder = getApiFolder(folder);
 
   /* =======================================================
@@ -221,25 +207,57 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
      ======================================================= */
 
   const [search, setSearch] = useState("");
-
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-
   const [page, setPage] = useState(1);
-
   const [syncing, setSyncing] = useState(false);
+
+  /*
+   * Digunakan untuk mencegah response/request lama
+   * mengganggu state halaman aktif.
+   */
+  const requestIdRef = useRef(0);
 
   /* =======================================================
      FETCH CURRENT FOLDER
      ======================================================= */
 
   useEffect(() => {
-    dispatch(
-      fetchEmails({
-        folder: apiFolder,
-        search: search.trim() || undefined,
-      }),
-    );
-  }, [dispatch, apiFolder, search]);
+    let cancelled = false;
+
+    const requestId = ++requestIdRef.current;
+
+    const timer = window.setTimeout(async () => {
+      if (cancelled || requestId !== requestIdRef.current) {
+        return;
+      }
+
+      try {
+        await dispatch(
+          fetchEmails({
+            folder: apiFolder,
+            search: search.trim() || undefined,
+            page,
+            limit: MAILS_PER_PAGE,
+          }),
+        ).unwrap();
+      } catch (err) {
+        /*
+         * Error sudah ditangani Redux.
+         *
+         * Jangan throw lagi ke browser agar tidak menjadi
+         * unhandled promise rejection / alarm console.
+         */
+        if (!cancelled) {
+          console.warn("[MAIL FETCH]", err);
+        }
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [dispatch, apiFolder, search, page]);
 
   /* =======================================================
      RESET WHEN FOLDER CHANGES
@@ -301,9 +319,12 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
 
   const totalPages = Math.max(1, Math.ceil(displayTotal / MAILS_PER_PAGE));
 
-  const currentStart = displayTotal === 0 ? 0 : (page - 1) * MAILS_PER_PAGE + 1;
+  const safePage = Math.min(page, totalPages);
 
-  const currentEnd = Math.min(page * MAILS_PER_PAGE, displayTotal);
+  const currentStart =
+    displayTotal === 0 ? 0 : (safePage - 1) * MAILS_PER_PAGE + 1;
+
+  const currentEnd = Math.min(safePage * MAILS_PER_PAGE, displayTotal);
 
   /* =======================================================
      UNREAD
@@ -343,6 +364,10 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
      ======================================================= */
 
   const handleRefresh = async () => {
+    if (syncing || loading) {
+      return;
+    }
+
     setSyncing(true);
 
     try {
@@ -350,8 +375,12 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
         fetchEmails({
           folder: apiFolder,
           search: search.trim() || undefined,
+          page: safePage,
+          limit: MAILS_PER_PAGE,
         }),
       ).unwrap();
+    } catch (err) {
+      console.warn("[MAIL REFRESH]", err);
     } finally {
       setSyncing(false);
     }
@@ -373,7 +402,7 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
 
       setSelectedIds([]);
     } catch (err) {
-      console.error("[MAIL READ]", err);
+      console.warn("[MAIL READ]", err);
     }
   };
 
@@ -393,7 +422,7 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
 
       setSelectedIds([]);
     } catch (err) {
-      console.error("[MAIL DELETE]", err);
+      console.warn("[MAIL DELETE]", err);
     }
   };
 
@@ -405,7 +434,7 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
     try {
       await dispatch(toggleEmailStar(id)).unwrap();
     } catch (err) {
-      console.error("[MAIL STAR]", err);
+      console.warn("[MAIL STAR]", err);
     }
   };
 
@@ -425,8 +454,12 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
         await dispatch(markEmailAsRead(detail.id)).unwrap();
       }
     } catch (err) {
-      console.error("[MAIL OPEN]", err);
+      console.warn("[MAIL OPEN]", err);
 
+      /*
+       * Fallback:
+       * tampilkan data list jika detail gagal.
+       */
       dispatch(setSelectedEmail(mail));
     }
   };
@@ -447,9 +480,15 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
 
       setSelectedIds([]);
     } catch (err) {
-      console.error("[MAIL ARCHIVE]", err);
+      console.warn("[MAIL ARCHIVE]", err);
     }
   };
+
+  /* =======================================================
+     ERROR DISPLAY
+     ======================================================= */
+
+  const safeError = error && error.trim() ? error : null;
 
   /* =======================================================
      RENDER
@@ -493,11 +532,11 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
           ERROR
           =================================================== */}
 
-      {error && (
+      {safeError && (
         <div className="inbox-error">
           <strong>Mail Error</strong>
 
-          <span>{error}</span>
+          <span>{safeError}</span>
         </div>
       )}
 
@@ -645,7 +684,6 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
                 value={search}
                 onChange={(event) => {
                   setSearch(event.target.value);
-
                   setPage(1);
                 }}
                 placeholder="Search mail..."
@@ -709,7 +747,6 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
                       className={`inbox-star ${mail.starred ? "active" : ""}`}
                       onClick={(event) => {
                         event.stopPropagation();
-
                         toggleStar(mail.id);
                       }}
                       title={mail.starred ? "Unstar" : "Star"}
@@ -735,15 +772,19 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
                     <div className="inbox-content">
                       <strong>{mail.subject || "(No Subject)"}</strong>
 
-                      <span> — {createPreview(mail)}</span>
+                      <span>
+                        {" — "}
+                        {createPreview(mail)}
+                      </span>
                     </div>
 
                     {/* ATTACHMENT */}
 
-                    {Array.isArray(mail.recipients) &&
-                      mail.recipients.length > 0 && (
-                        <Paperclip className="inbox-attachment" size={16} />
-                      )}
+                    {mail.hasAttachment ||
+                    (Array.isArray(mail.recipients) &&
+                      mail.recipients.length > 0) ? (
+                      <Paperclip className="inbox-attachment" size={16} />
+                    ) : null}
 
                     {/* DATE */}
 
@@ -783,7 +824,7 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
             <div className="inbox-pagination">
               <button
                 type="button"
-                disabled={page <= 1}
+                disabled={safePage <= 1}
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                 aria-label="Previous page"
               >
@@ -791,12 +832,12 @@ const Inbox: React.FC<InboxProps> = ({ folder = "INBOX" }) => {
               </button>
 
               <span>
-                {page} / {totalPages}
+                {safePage} / {totalPages}
               </span>
 
               <button
                 type="button"
-                disabled={page >= totalPages}
+                disabled={safePage >= totalPages}
                 onClick={() =>
                   setPage((current) => Math.min(totalPages, current + 1))
                 }

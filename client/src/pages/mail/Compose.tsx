@@ -9,8 +9,16 @@ import {
   Send,
   Trash2,
   Underline,
+  Table,
+  PenLine,
 } from "lucide-react";
+
+import SignaturePicker from "./Signature/SignaturePicker";
+import SignatureManager from "./Signature/SignatureManager";
+import type { EmailSignature } from "./Signature/SignatureManager";
+import sanitizeHtml from "../../utils/sanitizeHtml";
 import "./Compose.css";
+import api from "../../api/axios";
 
 /* =========================================================
    CONSTANTS
@@ -25,6 +33,7 @@ const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024;
 const Compose: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const savedRangeRef = useRef<Range | null>(null);
 
   const [to, setTo] = useState("");
   const [cc, setCc] = useState("");
@@ -39,14 +48,17 @@ const Compose: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const [showSignaturePicker, setShowSignaturePicker] = useState(false);
+  const [showSignatureManager, setShowSignatureManager] = useState(false);
+
   const [errors, setErrors] = useState<{
     to?: string;
     subject?: string;
   }>({});
 
-  /* =======================================================
+  /* =========================================================
      HELPERS
-     ======================================================= */
+     ========================================================= */
 
   const clearErrors = () => {
     setErrors({});
@@ -61,14 +73,19 @@ const Compose: React.FC = () => {
     setSaved(false);
     setErrors({});
 
+    savedRangeRef.current = null;
+
+    setShowSignaturePicker(false);
+    setShowSignatureManager(false);
+
     if (editorRef.current) {
       editorRef.current.innerHTML = "";
     }
   };
 
-  /* =======================================================
+  /* =========================================================
      ATTACHMENT
-     ======================================================= */
+     ========================================================= */
 
   const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
@@ -101,30 +118,31 @@ const Compose: React.FC = () => {
     );
   };
 
-  /* =======================================================
+  /* =========================================================
      SAVE DRAFT
-     ======================================================= */
+     ========================================================= */
 
   const handleSaveDraft = () => {
     setSaved(true);
 
     // Backend draft API will be connected here.
+
     window.setTimeout(() => {
       setSaved(false);
     }, 2500);
   };
 
-  /* =======================================================
+  /* =========================================================
      DISCARD
-     ======================================================= */
+     ========================================================= */
 
   const handleDiscard = () => {
     resetCompose();
   };
 
-  /* =======================================================
+  /* =========================================================
      VALIDATION
-     ======================================================= */
+     ========================================================= */
 
   const validateForm = () => {
     const nextErrors: {
@@ -145,9 +163,9 @@ const Compose: React.FC = () => {
     return Object.keys(nextErrors).length === 0;
   };
 
-  /* =======================================================
+  /* =========================================================
      SEND
-     ======================================================= */
+     ========================================================= */
 
   const handleSend = async () => {
     clearErrors();
@@ -160,31 +178,64 @@ const Compose: React.FC = () => {
 
     try {
       /*
-       * Backend send-mail API will be connected here.
-       *
-       * Example payload:
-       *
-       * {
-       *   to,
-       *   cc,
-       *   bcc,
-       *   subject,
-       *   message: editorRef.current?.innerHTML,
-       *   attachments
-       * }
+       * Ambil HTML dari editor.
        */
+      const rawBody = editorRef.current?.innerHTML || "";
 
-      await new Promise((resolve) => setTimeout(resolve, 700));
+      /*
+       * Sanitasi HTML untuk XSS protection.
+       */
+      const safeBody = sanitizeHtml(rawBody);
+
+      /*
+       * Payload email.
+       *
+       * Untuk test pertama:
+       * To isi dengan agroberkahn@gmail.com
+       */
+      const payload = {
+        to: to.trim(),
+        cc: cc.trim(),
+        bcc: bcc.trim(),
+        subject: subject.trim(),
+        body: safeBody,
+      };
+
+      console.log("EMAIL PAYLOAD:", payload);
+
+      /*
+       * Kirim ke backend.
+       */
+      const response = await api.post("/email", payload, {
+        withCredentials: true,
+      });
+
+      if (!response.data?.success) {
+        throw new Error(response.data?.message || "Email gagal dikirim.");
+      }
+
+      console.log("Email sent successfully:", response.data);
+
+      window.alert("Email berhasil dikirim.");
 
       resetCompose();
+    } catch (error: any) {
+      console.error("Send email failed:", error);
+
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Gagal mengirim email.";
+
+      window.alert(message);
     } finally {
       setSending(false);
     }
   };
 
-  /* =======================================================
+  /* =========================================================
      EDITOR COMMAND
-     ======================================================= */
+     ========================================================= */
 
   const execCommand = (command: string, value?: string) => {
     editorRef.current?.focus();
@@ -192,12 +243,30 @@ const Compose: React.FC = () => {
     document.execCommand(command, false, value);
   };
 
-  /* =======================================================
+  /* =========================================================
+     SAVE EDITOR SELECTION
+     ========================================================= */
+
+  const saveEditorSelection = () => {
+    const selection = window.getSelection();
+
+    if (!selection || selection.rangeCount === 0) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+
+    if (editorRef.current?.contains(range.commonAncestorContainer)) {
+      savedRangeRef.current = range.cloneRange();
+    }
+  };
+
+  /* =========================================================
      INSERT LINK
-     ======================================================= */
+     ========================================================= */
 
   const handleInsertLink = () => {
-    editorRef.current?.focus();
+    saveEditorSelection();
 
     const url = window.prompt("Enter URL", "https://");
 
@@ -208,23 +277,262 @@ const Compose: React.FC = () => {
     execCommand("createLink", url.trim());
   };
 
-  /* =======================================================
-     EDITOR INPUT
-     ======================================================= */
+  /* =========================================================
+     INSERT SIGNATURE
+     ========================================================= */
 
-  const handleEditorInput = () => {
+  const handleInsertSignature = (signature: EmailSignature) => {
+    const editor = editorRef.current;
+
+    if (!editor) {
+      return;
+    }
+
+    editor.focus();
+
+    const selection = window.getSelection();
+
+    let range: Range | null = savedRangeRef.current;
+
+    // Jika belum ada cursor tersimpan,
+    // gunakan posisi paling akhir editor.
+    if (!range) {
+      range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+    }
+
+    // Restore cursor / selection.
+    try {
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    } catch {
+      range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    // Spacing sebelum signature.
+    const spacer = document.createElement("div");
+
+    spacer.innerHTML = "<br>";
+
+    fragment.appendChild(spacer);
+
+    // Signature container.
+    const signatureContainer = document.createElement("div");
+
+    signatureContainer.setAttribute("data-signature", "true");
+
+    signatureContainer.style.marginTop = "12px";
+
+    signatureContainer.style.marginBottom = "12px";
+
+    if (signature.type === "TEXT") {
+      const lines = signature.content.split(/\r?\n/);
+
+      lines.forEach((line, index) => {
+        signatureContainer.appendChild(document.createTextNode(line));
+
+        if (index < lines.length - 1) {
+          signatureContainer.appendChild(document.createElement("br"));
+        }
+      });
+    } else {
+      const image = document.createElement("img");
+
+      image.src = signature.content;
+      image.alt = signature.name;
+
+      image.style.display = "block";
+      image.style.maxWidth = "320px";
+      image.style.height = "auto";
+
+      signatureContainer.appendChild(image);
+    }
+
+    fragment.appendChild(signatureContainer);
+
+    // Spacing setelah signature.
+    const after = document.createElement("div");
+
+    after.innerHTML = "<br>";
+
+    fragment.appendChild(after);
+
+    // Hapus selection lama.
+    range.deleteContents();
+
+    // Insert signature.
+    range.insertNode(fragment);
+
+    // Pindahkan cursor setelah signature.
+    const newRange = document.createRange();
+
+    newRange.selectNodeContents(after);
+    newRange.collapse(false);
+
+    selection?.removeAllRanges();
+    selection?.addRange(newRange);
+
+    // Simpan posisi cursor terbaru.
+    savedRangeRef.current = newRange.cloneRange();
+
+    setSaved(false);
+    setShowSignaturePicker(false);
+  };
+
+  /* =========================================================
+     INSERT TABLE
+     ========================================================= */
+
+  const handleInsertTable = () => {
+    const rowsInput = window.prompt("Number of rows:", "3");
+
+    if (rowsInput === null) {
+      return;
+    }
+
+    const colsInput = window.prompt("Number of columns:", "3");
+
+    if (colsInput === null) {
+      return;
+    }
+
+    const rows = Number(rowsInput);
+    const cols = Number(colsInput);
+
+    if (
+      !Number.isInteger(rows) ||
+      !Number.isInteger(cols) ||
+      rows < 1 ||
+      cols < 1 ||
+      rows > 20 ||
+      cols > 15
+    ) {
+      window.alert("Enter rows (1–20) and columns (1–15).");
+
+      return;
+    }
+
+    const hasHeader = window.confirm("Add a header row to the table?");
+
+    const editor = editorRef.current;
+
+    if (!editor) {
+      return;
+    }
+
+    const table = document.createElement("table");
+
+    table.setAttribute(
+      "style",
+      "width:100%; border-collapse:collapse; margin:12px 0;",
+    );
+
+    table.setAttribute("border", "1");
+
+    const tbody = document.createElement("tbody");
+
+    for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
+      const tr = document.createElement("tr");
+
+      for (let colIndex = 0; colIndex < cols; colIndex++) {
+        const isHeader = hasHeader && rowIndex === 0;
+
+        const cell = document.createElement(isHeader ? "th" : "td");
+
+        cell.setAttribute(
+          "style",
+          "border:1px solid #cbd5e1; padding:8px; min-width:60px;",
+        );
+
+        cell.innerHTML = isHeader ? `Header ${colIndex + 1}` : "&nbsp;";
+
+        tr.appendChild(cell);
+      }
+
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+
+    // Restore cursor position.
+    const selection = window.getSelection();
+
+    const range = savedRangeRef.current;
+
+    if (range && editor.contains(range.commonAncestorContainer)) {
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    } else {
+      editor.focus();
+
+      const fallbackRange = document.createRange();
+
+      fallbackRange.selectNodeContents(editor);
+
+      fallbackRange.collapse(false);
+
+      selection?.removeAllRanges();
+      selection?.addRange(fallbackRange);
+    }
+
+    const activeRange = selection?.rangeCount ? selection.getRangeAt(0) : null;
+
+    if (!activeRange) {
+      return;
+    }
+
+    activeRange.deleteContents();
+    activeRange.insertNode(table);
+
+    // Line after table.
+    const newLine = document.createElement("p");
+
+    newLine.innerHTML = "<br>";
+
+    table.parentNode?.insertBefore(newLine, table.nextSibling);
+
+    // Cursor after table.
+    const cursorRange = document.createRange();
+
+    cursorRange.setStart(newLine, 0);
+    cursorRange.collapse(true);
+
+    selection?.removeAllRanges();
+    selection?.addRange(cursorRange);
+
+    savedRangeRef.current = cursorRange.cloneRange();
+
+    editor.focus();
+
     setSaved(false);
   };
 
-  /* =======================================================
+  /* =========================================================
+     EDITOR INPUT
+     ========================================================= */
+
+  const handleEditorInput = () => {
+    setSaved(false);
+    saveEditorSelection();
+  };
+
+  /* =========================================================
      RENDER
-     ======================================================= */
+     ========================================================= */
 
   return (
     <div className="compose-page">
-      {/* ===================================================
+      {/* =====================================================
           HEADER
-          =================================================== */}
+          ===================================================== */}
 
       <div className="compose-header">
         <div>
@@ -240,14 +548,14 @@ const Compose: React.FC = () => {
         )}
       </div>
 
-      {/* ===================================================
+      {/* =====================================================
           CARD
-          =================================================== */}
+          ===================================================== */}
 
       <section className="compose-card">
-        {/* =================================================
+        {/* ===================================================
             TO
-            ================================================= */}
+            =================================================== */}
 
         <div className="compose-field-row">
           <label htmlFor="compose-to">To</label>
@@ -301,9 +609,9 @@ const Compose: React.FC = () => {
           </div>
         </div>
 
-        {/* =================================================
+        {/* ===================================================
             CC
-            ================================================= */}
+            =================================================== */}
 
         {showCc && (
           <div className="compose-field-row">
@@ -320,9 +628,9 @@ const Compose: React.FC = () => {
           </div>
         )}
 
-        {/* =================================================
+        {/* ===================================================
             BCC
-            ================================================= */}
+            =================================================== */}
 
         {showBcc && (
           <div className="compose-field-row">
@@ -339,9 +647,9 @@ const Compose: React.FC = () => {
           </div>
         )}
 
-        {/* =================================================
+        {/* ===================================================
             SUBJECT
-            ================================================= */}
+            =================================================== */}
 
         <div className="compose-field-row">
           <label htmlFor="compose-subject">Subject</label>
@@ -377,9 +685,9 @@ const Compose: React.FC = () => {
           </div>
         </div>
 
-        {/* =================================================
+        {/* ===================================================
             TOOLBAR
-            ================================================= */}
+            =================================================== */}
 
         <div className="compose-editor-toolbar">
           <button
@@ -426,18 +734,47 @@ const Compose: React.FC = () => {
 
           <button
             type="button"
-            onMouseDown={(event) => event.preventDefault()}
+            onMouseDown={(event) => {
+              saveEditorSelection();
+              event.preventDefault();
+            }}
             onClick={handleInsertLink}
             title="Insert link"
             aria-label="Insert link"
           >
             <Link size={16} />
           </button>
+
+          <button
+            type="button"
+            onMouseDown={(event) => {
+              saveEditorSelection();
+              event.preventDefault();
+            }}
+            onClick={handleInsertTable}
+            title="Insert table"
+            aria-label="Insert table"
+          >
+            <Table size={16} />
+          </button>
+
+          <button
+            type="button"
+            onMouseDown={(event) => {
+              saveEditorSelection();
+              event.preventDefault();
+            }}
+            onClick={() => setShowSignaturePicker(true)}
+            title="Insert signature"
+            aria-label="Insert signature"
+          >
+            <PenLine size={16} />
+          </button>
         </div>
 
-        {/* =================================================
+        {/* ===================================================
             EDITOR
-            ================================================= */}
+            =================================================== */}
 
         <div
           ref={editorRef}
@@ -449,11 +786,13 @@ const Compose: React.FC = () => {
           aria-label="Message body"
           data-placeholder="Write your message..."
           onInput={handleEditorInput}
+          onMouseUp={saveEditorSelection}
+          onKeyUp={saveEditorSelection}
         />
 
-        {/* =================================================
+        {/* ===================================================
             ATTACHMENTS
-            ================================================= */}
+            =================================================== */}
 
         {attachments.length > 0 && (
           <div className="compose-attachments">
@@ -485,9 +824,9 @@ const Compose: React.FC = () => {
           </div>
         )}
 
-        {/* =================================================
+        {/* ===================================================
             FOOTER
-            ================================================= */}
+            =================================================== */}
 
         <div className="compose-footer">
           <div className="compose-footer-left">
@@ -541,6 +880,33 @@ const Compose: React.FC = () => {
           </button>
         </div>
       </section>
+
+      {/* =====================================================
+          SIGNATURE PICKER
+          ===================================================== */}
+
+      <SignaturePicker
+        open={showSignaturePicker}
+        onClose={() => setShowSignaturePicker(false)}
+        onSelect={handleInsertSignature}
+        onManage={() => {
+          setShowSignaturePicker(false);
+          setShowSignatureManager(true);
+        }}
+      />
+
+      {/* =====================================================
+          SIGNATURE MANAGER
+          ===================================================== */}
+
+      <SignatureManager
+        open={showSignatureManager}
+        onClose={() => setShowSignatureManager(false)}
+        onSelect={(signature) => {
+          setShowSignatureManager(false);
+          handleInsertSignature(signature);
+        }}
+      />
     </div>
   );
 };

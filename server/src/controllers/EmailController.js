@@ -147,7 +147,6 @@ export const getEmails = async (req, res) => {
     const { folder = "INBOX", search = "", page = 1, limit = 25 } = req.query;
 
     const currentPage = Math.max(Number(page) || 1, 1);
-
     const currentLimit = Math.min(Math.max(Number(limit) || 25, 1), 100);
 
     const offset = (currentPage - 1) * currentLimit;
@@ -185,19 +184,18 @@ export const getEmails = async (req, res) => {
       ];
     }
 
+    console.log("[EmailController.getEmails]");
+    console.log("WHERE:", where);
+
     const result = await Email.findAndCountAll({
       where,
-
-      include: getInclude(),
-
       order: [["createdAt", "DESC"]],
-
       limit: currentLimit,
-
       offset,
-
-      distinct: true,
     });
+
+    console.log("EMAIL COUNT:", result.count);
+    console.log("EMAIL ROWS:", result.rows.length);
 
     const emails = result.rows.map(normalizeEmail);
 
@@ -214,12 +212,7 @@ export const getEmails = async (req, res) => {
   } catch (err) {
     console.error("[EmailController.getEmails]", err);
 
-    return error(
-      res,
-      500,
-      "Gagal mengambil daftar email.",
-      process.env.NODE_ENV === "development" ? err.message : null,
-    );
+    return error(res, 500, "Gagal mengambil daftar email.", err.message);
   }
 };
 

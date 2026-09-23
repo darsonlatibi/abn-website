@@ -37,6 +37,14 @@ import ForgotPassword from "../pages/Login/ForgotPassword";
 import ResetPassword from "../pages/Login/ResetPassword";
 import Compose from "../pages/mail/Compose";
 import ChangePassword from "../pages/Login/ChangePassword";
+import Finance from "../pages/management/Finance";
+import HR from "../pages/management/HR";
+import Inventory from "../pages/management/Inventory";
+import Procurement from "../pages/management/Procurement";
+import CRM from "../pages/management/CRM";
+import Support from "../pages/Support/Support";
+import BeliEMS from "../pages/EMS/Beli/BeliEMS";
+import SewaEMS from "../pages/EMS/Sewa/SewaEMS";
 
 /* =========================================================
    ABN CORPORATE WEBSITE
@@ -61,6 +69,9 @@ function AppRouter() {
         <Route path="/about" element={<About />} />
 
         {/* Layanan */}
+        <Route path="/layanan/support" element={<Support />} />
+        <Route path="/layanan/ems/beli" element={<BeliEMS />} />
+        <Route path="/layanan/ems/sewa" element={<SewaEMS />} />
         <Route
           path="/layanan/software-development"
           element={<SoftwareDevelopment />}
@@ -85,6 +96,13 @@ function AppRouter() {
         <Route path="/layanan/iot-hardware" element={<IotHardware />} />
 
         <Route path="/layanan/fleet-management" element={<FleetManagement />} />
+
+        <Route path="/layanan/hr" element={<HR />} />
+
+        <Route path="/layanan/finance" element={<Finance />} />
+        <Route path="/layanan/inventory" element={<Inventory />} />
+        <Route path="/layanan/proc" element={<Procurement />} />
+        <Route path="/layanan/crm" element={<CRM />} />
 
         <Route path="/layanan/gps-tracking" element={<GpsTracking />} />
 

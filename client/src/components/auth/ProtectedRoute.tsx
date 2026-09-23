@@ -1,14 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-
 import { useSelector } from "react-redux";
 
 import type { RootState } from "../../stores/store";
-import AuthLoading from "./AuthLoading";
-
-/* =========================================================
-   ABN FLEET SYSTEM
-   PROTECTED ROUTE
-   ========================================================= */
 
 function ProtectedRoute() {
   const location = useLocation();
@@ -17,39 +10,52 @@ function ProtectedRoute() {
     (state: RootState) => state.auth,
   );
 
-  /* =======================================================
-     AUTH INITIALIZATION
-     ======================================================= */
+  console.log("ABN AUTH:", {
+    authenticated,
+    initialized,
+    loading,
+    path: location.pathname,
+  });
 
   /*
-   * Saat aplikasi baru dibuka,
-   * tunggu AuthInitializer menyelesaikan
-   * pengecekan session.
+   * Tunggu sampai proses pemulihan session selesai.
+   *
+   * Saat full page refresh:
+   * - Redux masih kosong
+   * - AuthInitializer melakukan /auth/refresh
+   * - kemudian /auth/me
+   *
+   * Selama initialized=false, JANGAN redirect ke /login.
    */
-  if (!initialized || loading) {
-    return <AuthLoading />;
+  if (!initialized) {
+    return <div className="auth-loading">Restoring ABN Trade session...</div>;
   }
 
-  /* =======================================================
-     NOT AUTHENTICATED
-     ======================================================= */
+  /*
+   * Tunggu proses auth loading selesai.
+   */
+  if (loading) {
+    return <div className="auth-loading">Loading ABN Trade...</div>;
+  }
 
+  /*
+   * Session benar-benar tidak aktif.
+   * Baru sekarang redirect ke login.
+   */
   if (!authenticated) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{
-          from: location,
-        }}
-      />
-    );
+    console.warn("ABN AUTH: ProtectedRoute -> LOGIN", {
+      initialized,
+      loading,
+      authenticated,
+      path: location.pathname,
+    });
+
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  /* =======================================================
-     AUTHENTICATED
-     ======================================================= */
-
+  /*
+   * Session valid.
+   */
   return <Outlet />;
 }
 

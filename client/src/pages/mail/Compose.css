@@ -932,3 +932,39 @@
     width: 100%;
   }
 }
+
+/* Inserted email tables */
+.compose-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  table-layout: fixed;
+}
+
+.compose-editor th,
+.compose-editor td {
+  border: 1px solid #cbd5e1;
+  padding: 8px;
+  min-width: 60px;
+  vertical-align: top;
+  overflow-wrap: break-word;
+}
+
+.compose-editor th {
+  background: #f1f5f9;
+  font-weight: 600;
+  text-align: left;
+}
+
+.compose-editor td:focus,
+.compose-editor th:focus {
+  outline: 1px solid #64748b;
+}
+
+/* Toolbar button */
+.compose-editor-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}

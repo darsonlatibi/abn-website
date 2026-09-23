@@ -284,6 +284,7 @@ function sanitizeUser(user) {
     username: user.username,
     email: user.email,
     full_name: user.full_name,
+    avatar: user.avatar,
     role: user.role,
     status: user.status,
     created_at: user.created_at,

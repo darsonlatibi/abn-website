@@ -1,26 +1,19 @@
 import { useEffect } from "react";
-
 import { useDispatch, useSelector } from "react-redux";
 
 import type { AppDispatch, RootState } from "../../stores/store";
 
-import { getCurrentUser } from "../../features/auth/authSlice";
+import {
+  getCurrentUser,
+  setAuthInitialized,
+} from "../../features/auth/authSlice";
 
 import { refreshAccessToken } from "../../api/axios";
-
-/* =========================================================
-   ABN FLEET SYSTEM
-   AUTH INITIALIZER
-   ========================================================= */
 
 function AuthInitializer() {
   const dispatch = useDispatch<AppDispatch>();
 
-  const { initialized } = useSelector((state: RootState) => state.auth);
-
-  /* =======================================================
-     INITIALIZE AUTH
-     ======================================================= */
+  const initialized = useSelector((state: RootState) => state.auth.initialized);
 
   useEffect(() => {
     if (initialized) {
@@ -30,65 +23,62 @@ function AuthInitializer() {
     let cancelled = false;
 
     const initializeAuth = async () => {
+      console.log("ABN AUTH: Initializing session...");
+
       try {
-        console.log("ABN AUTH: Initializing session...");
-
-        /* =================================================
-           REFRESH ACCESS TOKEN
-           ================================================= */
-
-        const token = await refreshAccessToken();
-
         /*
-         * Component sudah unmount.
+         * Full page refresh:
+         * accessToken Redux kosong.
+         *
+         * Ambil access token baru melalui
+         * HttpOnly refresh cookie.
          */
+        const accessToken = await refreshAccessToken();
+
+        console.log("ABN AUTH: refresh result:", {
+          hasAccessToken: Boolean(accessToken),
+        });
+
         if (cancelled) {
           return;
         }
 
-        /* =================================================
-           TIDAK ADA SESSION
-           ================================================= */
-
-        if (!token) {
-          console.info("ABN AUTH: Tidak ada session aktif.");
-
+        /*
+         * Tidak ada refresh session.
+         * Biarkan ProtectedRoute mengarahkan
+         * ke login setelah initialized=true.
+         */
+        if (!accessToken) {
+          console.log("ABN AUTH: No active session.");
+          dispatch(setAuthInitialized(true));
           return;
         }
 
-        /* =================================================
-           GET CURRENT USER
-           ================================================= */
+        /*
+         * Access token sudah berhasil dibuat.
+         * Sekarang ambil user.
+         */
+        const result = await dispatch(getCurrentUser());
 
-        await dispatch(getCurrentUser()).unwrap();
+        if (cancelled) {
+          return;
+        }
 
-        if (!cancelled) {
-          console.log("ABN AUTH: Session berhasil dipulihkan.");
+        if (getCurrentUser.fulfilled.match(result)) {
+          console.log("ABN AUTH: Session restored successfully.");
+        } else {
+          console.warn(
+            "ABN AUTH: Failed to restore user session.",
+            result.payload,
+          );
         }
       } catch (error) {
         if (!cancelled) {
-          console.info("ABN AUTH: Session tidak aktif.", error);
+          console.error("ABN AUTH: Session initialization error:", error);
         }
       } finally {
-        /*
-         * Sangat penting:
-         *
-         * AuthInitializer harus selesai
-         * apapun hasil refresh.
-         *
-         * getCurrentUser.fulfilled/rejected juga
-         * mengubah initialized = true.
-         *
-         * Tetapi jika refresh gagal sebelum
-         * getCurrentUser dijalankan, kita tetap
-         * harus menandai initialization selesai.
-         */
-
         if (!cancelled) {
-          dispatch({
-            type: "auth/setAuthInitialized",
-            payload: true,
-          });
+          dispatch(setAuthInitialized(true));
         }
       }
     };

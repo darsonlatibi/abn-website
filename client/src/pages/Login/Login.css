@@ -1,27 +1,31 @@
 /* =========================================================
-   ABN TRACKER
+   ABN DIGITAL & INDUSTRIAL TECHNOLOGY
    LOGIN PAGE
    ========================================================= */
 
 .login-page {
   min-height: 100vh;
   min-height: 100dvh;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 24px;
+
   background:
     radial-gradient(
       circle at top left,
-      rgba(37, 99, 235, 0.16),
+      rgba(15, 118, 110, 0.18),
       transparent 32%
     ),
     radial-gradient(
       circle at bottom right,
-      rgba(14, 165, 233, 0.12),
+      rgba(20, 184, 166, 0.12),
       transparent 30%
     ),
-    #0b1120;
+    #0b1220;
+
   color: #e5e7eb;
   box-sizing: border-box;
 }
@@ -33,14 +37,20 @@
 .login-card {
   width: 100%;
   max-width: 430px;
+
   padding: 38px;
+
   background: rgba(15, 23, 42, 0.94);
+
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 18px;
+
   box-shadow:
     0 24px 60px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(255, 255, 255, 0.02);
+
   backdrop-filter: blur(18px);
+
   box-sizing: border-box;
 }
 
@@ -60,35 +70,48 @@
 .login-logo {
   width: 78px;
   height: 78px;
+
   margin: 0 auto 18px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   background: transparent;
   border-radius: 18px;
+
   overflow: hidden;
+
   filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.28));
+
   box-sizing: border-box;
 }
 
 .login-logo img {
   width: 100%;
   height: 100%;
+
   display: block;
+
   object-fit: contain;
 }
 
 .login-header h1 {
   margin: 0;
+
   color: #f8fafc;
+
   font-size: 25px;
   font-weight: 800;
+
   letter-spacing: 0.8px;
 }
 
 .login-header p {
   margin: 8px 0 0;
+
   color: #94a3b8;
+
   font-size: 13px;
 }
 
@@ -110,6 +133,7 @@
 
 .form-group label {
   color: #cbd5e1;
+
   font-size: 13px;
   font-weight: 600;
 }
@@ -120,15 +144,23 @@
 
 .input-wrapper {
   min-height: 48px;
+
   display: flex;
   align-items: center;
+
   gap: 10px;
+
   padding: 0 13px;
+
   background: #0f172a;
+
   border: 1px solid #334155;
   border-radius: 10px;
+
   color: #64748b;
+
   box-sizing: border-box;
+
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -140,18 +172,24 @@
 }
 
 .input-wrapper:focus-within {
-  border-color: #3b82f6;
+  border-color: #0f766e;
+
   background: #111c31;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
 }
 
 .input-wrapper input {
   width: 100%;
   min-width: 0;
+
   border: 0;
   outline: 0;
+
   background: transparent;
+
   color: #f8fafc;
+
   font-family: inherit;
   font-size: 14px;
 }
@@ -166,20 +204,26 @@
 
 .password-toggle {
   flex-shrink: 0;
+
   border: 0;
   background: transparent;
-  color: #60a5fa;
+
+  color: #5eead4;
+
   cursor: pointer;
+
   font-size: 11px;
   font-weight: 700;
+
   padding: 5px;
+
   transition:
     color 0.2s ease,
     opacity 0.2s ease;
 }
 
 .password-toggle:hover:not(:disabled) {
-  color: #93c5fd;
+  color: #99f6e4;
 }
 
 .password-toggle:disabled {
@@ -192,40 +236,75 @@
    ========================================================= */
 
 .forgot-password-wrapper {
+  width: 100%;
+
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
+
+  justify-content: space-between;
+
+  gap: 16px;
+
   min-height: 20px;
-  margin-top: -2px;
+
+  margin-top: 1px;
 }
 
 .forgot-password-link,
 .change-password-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  color: #60a5fa;
+  color: #5eead4;
+
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 650;
+
   line-height: 1.4;
+
   text-decoration: none;
+
   white-space: nowrap;
+
   transition:
     color 0.2s ease,
-    text-decoration 0.2s ease,
-    opacity 0.2s ease;
+    opacity 0.2s ease,
+    text-decoration 0.2s ease;
+}
+
+/* LEFT */
+
+.forgot-password-link {
+  margin-right: auto;
+
+  display: inline-flex;
+  align-items: center;
+
+  justify-content: flex-start;
+
+  text-align: left;
+}
+
+/* RIGHT */
+
+.change-password-link {
+  margin-left: auto;
+
+  display: inline-flex;
+  align-items: center;
+
+  justify-content: flex-end;
+
+  gap: 5px;
+
+  text-align: right;
 }
 
 .forgot-password-link:hover,
 .change-password-link:hover {
-  color: #93c5fd;
+  color: #99f6e4;
   text-decoration: underline;
 }
 
 .change-password-link svg {
-  flex-shrink: 0;
+  flex: 0 0 auto;
 }
 
 /* =========================================================
@@ -234,8 +313,11 @@
 
 .change-password-link::before {
   content: "|";
+
   margin-right: 7px;
+
   color: #475569;
+
   text-decoration: none;
 }
 
@@ -245,13 +327,19 @@
 
 .login-error {
   margin-top: 4px;
+
   padding: 10px 12px;
+
   border: 1px solid rgba(248, 113, 113, 0.35);
   border-radius: 8px;
+
   background: rgba(127, 29, 29, 0.28);
+
   color: #fecaca;
+
   font-size: 12px;
   line-height: 1.4;
+
   box-sizing: border-box;
 }
 
@@ -262,21 +350,33 @@
 .login-button {
   width: 100%;
   min-height: 48px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 9px;
+
   margin-top: 4px;
+
   border: 0;
   border-radius: 10px;
-  background: linear-gradient(135deg, #2563eb, #0284c7);
+
+  background: linear-gradient(135deg, #0f766e, #0d9488);
+
   color: #ffffff;
+
   font-family: inherit;
+
   font-size: 14px;
   font-weight: 700;
+
   letter-spacing: 0.3px;
+
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+
+  box-shadow: 0 10px 25px rgba(15, 118, 110, 0.25);
+
   transition:
     transform 0.15s ease,
     box-shadow 0.2s ease,
@@ -285,7 +385,8 @@
 
 .login-button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.35);
+
+  box-shadow: 0 14px 30px rgba(15, 118, 110, 0.35);
 }
 
 .login-button:active:not(:disabled) {
@@ -304,21 +405,33 @@
 .register-link-button {
   width: 100%;
   min-height: 46px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 9px;
+
   box-sizing: border-box;
+
   border: 1px solid #334155;
   border-radius: 10px;
+
   background: transparent;
+
   color: #cbd5e1;
+
   font-family: inherit;
+
   font-size: 14px;
   font-weight: 600;
+
   letter-spacing: 0.2px;
+
   text-decoration: none;
+
   cursor: pointer;
+
   transition:
     background 0.2s ease,
     border-color 0.2s ease,
@@ -328,7 +441,9 @@
 
 .register-link-button:hover {
   background: #1e293b;
+
   border-color: #475569;
+
   color: #ffffff;
 }
 
@@ -356,15 +471,20 @@
 
 .login-business {
   margin-top: 18px;
+
   padding-top: 16px;
+
   border-top: 1px solid rgba(148, 163, 184, 0.12);
+
   text-align: center;
 }
 
 .login-business-text {
   display: flex;
   flex-direction: column;
+
   align-items: center;
+
   gap: 7px;
 }
 
@@ -375,20 +495,27 @@
 
 .business-link {
   display: inline-flex;
+
   align-items: center;
   justify-content: center;
+
   gap: 6px;
+
   font-size: 13px;
   font-weight: 600;
-  color: #60a5fa;
+
+  color: #5eead4;
+
   text-decoration: none;
+
   transition:
     color 0.2s ease,
     transform 0.2s ease;
 }
 
 .business-link:hover {
-  color: #93c5fd;
+  color: #99f6e4;
+
   transform: translateY(-1px);
 }
 
@@ -404,10 +531,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   margin-top: 28px;
+
   padding-top: 18px;
+
   border-top: 1px solid rgba(148, 163, 184, 0.12);
+
   color: #64748b;
+
   font-size: 11px;
 }
 
@@ -432,6 +564,7 @@
   .login-logo {
     width: 58px;
     height: 58px;
+
     margin-bottom: 15px;
   }
 
@@ -440,8 +573,7 @@
   }
 
   .forgot-password-wrapper {
-    justify-content: space-between;
-    gap: 8px;
+    gap: 10px;
   }
 
   .forgot-password-link,
@@ -491,19 +623,28 @@
     min-height: 44px;
   }
 
+  /*
+     Tetap kiri-kanan pada layar kecil.
+     Tidak dibuat column agar UX konsisten.
+  */
+
   .forgot-password-wrapper {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 5px;
+    flex-direction: row;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 6px;
   }
 
   .forgot-password-link,
   .change-password-link {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .change-password-link::before {
-    display: none;
+    margin-right: 4px;
   }
 
   .login-business {

@@ -6,12 +6,23 @@
 import jwt from "jsonwebtoken";
 
 /* =========================================================
+   GET JWT ACCESS SECRET
+   ========================================================= */
+const getAccessSecret = () => {
+  return process.env.ACCESS_TOKEN_SECRET || null;
+};
+
+/* =========================================================
    VERIFY ACCESS TOKEN
    ========================================================= */
 
 export const verifyToken = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+
+    /* =====================================================
+       AUTHORIZATION HEADER
+       ===================================================== */
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
@@ -29,8 +40,11 @@ export const verifyToken = (req, res, next) => {
       });
     }
 
-    const secret =
-      process.env.JWT_ACCESS_SECRET || process.env.JWT_ACCESS_TOKEN_SECRET;
+    /* =====================================================
+       JWT SECRET
+       ===================================================== */
+
+    const secret = getAccessSecret();
 
     if (!secret) {
       console.error("[verifyToken] JWT access secret belum dikonfigurasi.");
@@ -40,6 +54,10 @@ export const verifyToken = (req, res, next) => {
         message: "JWT configuration error.",
       });
     }
+
+    /* =====================================================
+       VERIFY TOKEN
+       ===================================================== */
 
     const decoded = jwt.verify(token, secret);
 
@@ -64,12 +82,20 @@ export const verifyToken = (req, res, next) => {
   } catch (err) {
     console.error("[verifyToken]", err.message);
 
+    /* =====================================================
+       TOKEN EXPIRED
+       ===================================================== */
+
     if (err.name === "TokenExpiredError") {
       return res.status(401).json({
         success: false,
         message: "Access token expired.",
       });
     }
+
+    /* =====================================================
+       INVALID TOKEN
+       ===================================================== */
 
     return res.status(401).json({
       success: false,

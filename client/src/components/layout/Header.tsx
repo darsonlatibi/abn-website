@@ -18,7 +18,14 @@ import {
   Sun,
   Truck,
   User,
+  Users,
   X,
+  Wallet,
+  Boxes,
+  ShoppingCart,
+  UsersRound,
+  Coffee,
+  KeyRound,
 } from "lucide-react";
 
 import { useEffect, useRef, useState } from "react";
@@ -97,6 +104,31 @@ const getNavigation = (
 
       children: [
         {
+          label: "ABN EMS & Support",
+
+          children: [
+            {
+              label: "Support ABN",
+              path: "/layanan/support",
+              icon: Coffee,
+              description: "Dukung pengembangan dan ekosistem ABN.",
+            },
+            {
+              label: "Sewa ABN EMS",
+              path: "/layanan/ems/sewa",
+              icon: KeyRound,
+              description: "Gunakan ABN EMS dengan layanan subscription.",
+            },
+            {
+              label: "Beli ABN EMS",
+              path: "/layanan/ems/beli",
+              icon: ShoppingCart,
+              description: "Dapatkan license ABN EMS untuk perusahaan.",
+            },
+          ],
+        },
+
+        {
           label: "Digital & Software",
 
           children: [
@@ -158,6 +190,38 @@ const getNavigation = (
               label: "GPS Tracking",
               path: "/layanan/gps-tracking",
               icon: Satellite,
+            },
+          ],
+        },
+
+        {
+          label: "Enterprise Management",
+
+          children: [
+            {
+              label: "HR Management",
+              path: "/layanan/hr",
+              icon: Users,
+            },
+            {
+              label: "Finance Management",
+              path: "/layanan/finance",
+              icon: Wallet,
+            },
+            {
+              label: "Inventory Management",
+              path: "/layanan/inventory",
+              icon: Boxes,
+            },
+            {
+              label: "Procurement Management",
+              path: "/layanan/proc",
+              icon: ShoppingCart,
+            },
+            {
+              label: "CRM",
+              path: "/layanan/crm",
+              icon: UsersRound,
             },
           ],
         },

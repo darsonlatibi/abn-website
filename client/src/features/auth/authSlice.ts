@@ -337,6 +337,12 @@ export const logout = createAsyncThunk<
    POST /api/auth/register
    ========================================================= */
 
+/* =========================================================
+   REGISTER
+   POST /api/auth/register
+   Compatible with ABN TRADE
+   ========================================================= */
+
 export const register = createAsyncThunk<
   RegisterResponse,
   {
@@ -350,18 +356,72 @@ export const register = createAsyncThunk<
   }
 >("auth/register", async (credentials, thunkAPI) => {
   try {
+    const username = String(credentials.username ?? "").trim();
+
+    const email = String(credentials.email ?? "")
+      .trim()
+      .toLowerCase();
+
+    const password = String(credentials.password ?? "");
+
+    const full_name = String(credentials.full_name ?? "").trim();
+
+    /* =====================================================
+       VALIDATION
+       ===================================================== */
+
+    if (!username) {
+      return thunkAPI.rejectWithValue("Username wajib diisi.");
+    }
+
+    if (!full_name) {
+      return thunkAPI.rejectWithValue("Nama lengkap wajib diisi.");
+    }
+
+    if (!email) {
+      return thunkAPI.rejectWithValue("Email wajib diisi.");
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      return thunkAPI.rejectWithValue("Format email tidak valid.");
+    }
+
+    if (!password) {
+      return thunkAPI.rejectWithValue("Password wajib diisi.");
+    }
+
+    if (password.length < 6) {
+      return thunkAPI.rejectWithValue("Password minimal 6 karakter.");
+    }
+
+    if (password.length > 100) {
+      return thunkAPI.rejectWithValue("Password maksimal 100 karakter.");
+    }
+
+    /* =====================================================
+       REGISTER REQUEST
+       ===================================================== */
+
     const response = await api.post<RegisterResponse>(
       "/auth/register",
       {
-        username: credentials.username,
-        email: credentials.email,
-        password: credentials.password,
-        full_name: credentials.full_name,
+        username,
+        email,
+        password,
+        full_name,
       },
       {
         withCredentials: true,
       },
     );
+
+    console.log("ABN REGISTER RESPONSE:", response.data);
+
+    /* =====================================================
+       RESPONSE VALIDATION
+       ===================================================== */
 
     if (!response.data?.success) {
       return thunkAPI.rejectWithValue(
@@ -371,6 +431,11 @@ export const register = createAsyncThunk<
 
     return response.data;
   } catch (error: any) {
+    console.error(
+      "ABN REGISTER ERROR:",
+      error?.response?.data || error?.message,
+    );
+
     const message =
       error?.response?.data?.message ||
       error?.response?.data?.msg ||
