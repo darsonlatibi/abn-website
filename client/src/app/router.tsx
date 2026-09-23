@@ -45,6 +45,8 @@ import CRM from "../pages/management/CRM";
 import Support from "../pages/Support/Support";
 import BeliEMS from "../pages/EMS/Beli/BeliEMS";
 import SewaEMS from "../pages/EMS/Sewa/SewaEMS";
+import OdooEmployees from "../pages/odoo/OdooEmployees";
+import OdooUsers from "../pages/odoo/OdooUsers";
 
 /* =========================================================
    ABN CORPORATE WEBSITE
@@ -153,6 +155,9 @@ function AppRouter() {
           <Route path="/mail/trash" element={<Inbox folder="TRASH" />} />
 
           <Route path="/mail/compose" element={<Compose />} />
+
+          <Route path="/odoo/users" element={<OdooUsers />} />
+          <Route path="/odoo/employees" element={<OdooEmployees />} />
         </Route>
       </Route>
 

@@ -12,6 +12,9 @@ import {
    COOKIE CONFIG
    ========================================================= */
 
+const REFRESH_TOKEN_COOKIE = "abn_website_refresh_token";
+const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
+
 const isProduction = process.env.NODE_ENV === "production";
 
 const cookieOptions = {
@@ -59,9 +62,9 @@ export async function login(req, res) {
      *
      * Frontend tidak perlu membaca token ini.
      */
-    res.cookie("abn_website_refresh_token", result.refreshToken, {
+    res.cookie(REFRESH_TOKEN_COOKIE, result.refreshToken, {
       ...cookieOptions,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     /*
@@ -72,7 +75,6 @@ export async function login(req, res) {
     return res.status(200).json({
       success: true,
       message: "Login successful.",
-
       data: {
         accessToken: result.accessToken,
         expiresIn: result.expiresIn,
@@ -156,7 +158,7 @@ export async function register(req, res) {
 
 export async function refresh(req, res) {
   try {
-    const refreshToken = req.cookies?.abn_website_refresh_token;
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
 
     if (!refreshToken) {
       return res.status(401).json({
@@ -170,18 +172,16 @@ export async function refresh(req, res) {
     /*
      * Rotate refresh token.
      */
-    res.cookie("abn_website_refresh_token", result.refreshToken, {
+    res.cookie(REFRESH_TOKEN_COOKIE, result.refreshToken, {
       ...cookieOptions,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     /*
-     * PENTING:
+     * Access token harus TOP LEVEL
+     * agar frontend dapat membaca:
      *
-     * Axios refreshAccessToken() frontend
-     * membaca response.data.accessToken
-     *
-     * Jadi accessToken harus TOP LEVEL.
+     * response.data.accessToken
      */
     return res.status(200).json({
       success: true,
@@ -192,7 +192,7 @@ export async function refresh(req, res) {
   } catch (error) {
     console.error("AUTH REFRESH ERROR:", error);
 
-    res.clearCookie("abn_website_refresh_token", cookieOptions);
+    res.clearCookie(REFRESH_TOKEN_COOKIE, cookieOptions);
 
     return res.status(error.status || 401).json({
       success: false,
@@ -208,7 +208,7 @@ export async function refresh(req, res) {
 
 export async function logout(req, res) {
   try {
-    res.clearCookie("abn_website_refresh_token", cookieOptions);
+    res.clearCookie(REFRESH_TOKEN_COOKIE, cookieOptions);
 
     return res.status(200).json({
       success: true,

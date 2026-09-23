@@ -7,7 +7,6 @@ import {
   Database,
   Factory,
   Gauge,
-  // Mail,
   Menu,
   Moon,
   Network,
@@ -53,6 +52,7 @@ import "./Header.css";
    MEGA MENU + MOBILE ACCORDION
    AUTHENTICATION
    ADMIN MAIL
+   NESTED MENU SUPPORT
    ========================================================= */
 
 type NavigationChild = {
@@ -223,6 +223,29 @@ const getNavigation = (
               path: "/layanan/crm",
               icon: UsersRound,
             },
+
+            /* =================================================
+               ODOO
+               ================================================= */
+
+            {
+              label: "Odoo ERP",
+
+              children: [
+                {
+                  label: "Odoo Users",
+                  path: "/odoo/users",
+                  icon: Users,
+                  description: "Kelola dan lihat pengguna dari Odoo ERP.",
+                },
+                {
+                  label: "Odoo Employees",
+                  path: "/odoo/employees",
+                  icon: User,
+                  description: "Data karyawan yang terintegrasi dengan Odoo.",
+                },
+              ],
+            },
           ],
         },
 
@@ -250,27 +273,15 @@ const getNavigation = (
       ],
     },
 
-    /* =====================================================
-       PORTFOLIO
-       ===================================================== */
-
     {
       label: "Portfolio",
       path: "/portfolio",
     },
 
-    /* =====================================================
-       BLOG
-       ===================================================== */
-
     {
       label: "Blog",
       path: "/blog",
     },
-
-    /* =====================================================
-       KONTAK
-       ===================================================== */
 
     {
       label: "Kontak",
@@ -278,8 +289,8 @@ const getNavigation = (
     },
 
     /* =====================================================
-   ADMIN ONLY — MAILBOX
-   ===================================================== */
+       ADMIN ONLY — MAILBOX
+       ===================================================== */
 
     ...(canAccessMailbox
       ? [
@@ -293,14 +304,10 @@ const getNavigation = (
 };
 
 /* =========================================================
-   THEME TYPE
+   THEME
    ========================================================= */
 
 type Theme = "light" | "dark";
-
-/* =========================================================
-   THEME STORAGE
-   ========================================================= */
 
 const THEME_STORAGE_KEY = "abn-theme";
 
@@ -491,6 +498,140 @@ function Header() {
   const displayName =
     user?.full_name || user?.username || user?.email || "Account";
 
+  /* =========================================================
+     RECURSIVE DESKTOP MENU
+     ========================================================= */
+
+  const renderDesktopChildren = (
+    children: NavigationChild[] | undefined,
+    level = 0,
+  ): React.ReactNode => {
+    if (!children || children.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className={`website-mega-level website-mega-level-${level}`}>
+        {children.map((child) => {
+          const Icon = child.icon;
+          const hasChildren = child.children && child.children.length > 0;
+
+          /* -----------------------------------------------
+             NESTED CATEGORY
+             ----------------------------------------------- */
+
+          if (hasChildren) {
+            return (
+              <div key={child.label} className="website-mega-nested">
+                <div className="website-mega-nested-title">
+                  {Icon && (
+                    <span className="website-mega-nested-icon">
+                      <Icon size={16} strokeWidth={1.8} />
+                    </span>
+                  )}
+
+                  <span>{child.label}</span>
+                </div>
+
+                {renderDesktopChildren(child.children, level + 1)}
+              </div>
+            );
+          }
+
+          /* -----------------------------------------------
+             FINAL SERVICE
+             ----------------------------------------------- */
+
+          return (
+            <NavLink
+              key={child.path || child.label}
+              to={child.path || "#"}
+              className="website-mega-link"
+              onClick={() => {
+                clearDesktopCloseTimer();
+                setDesktopServicesOpen(false);
+              }}
+            >
+              <span className="website-mega-link-icon">
+                {Icon && <Icon size={17} strokeWidth={1.8} />}
+              </span>
+
+              <span className="website-mega-link-content">
+                <strong>{child.label}</strong>
+
+                <small>{child.description || "Explore solution"}</small>
+              </span>
+
+              <ArrowRight size={14} className="website-mega-link-arrow" />
+            </NavLink>
+          );
+        })}
+      </div>
+    );
+  };
+
+  /* =========================================================
+     RECURSIVE MOBILE MENU
+     ========================================================= */
+
+  const renderMobileChildren = (
+    children: NavigationChild[] | undefined,
+    level = 0,
+  ): React.ReactNode => {
+    if (!children || children.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className={`website-mobile-level website-mobile-level-${level}`}>
+        {children.map((child) => {
+          const Icon = child.icon;
+
+          const hasChildren = child.children && child.children.length > 0;
+
+          /* -----------------------------------------------
+             NESTED CATEGORY
+             ----------------------------------------------- */
+
+          if (hasChildren) {
+            return (
+              <div key={child.label} className="website-mobile-nested">
+                <div className="website-mobile-category-title">
+                  {Icon && <Icon size={15} strokeWidth={1.8} />}
+
+                  <span>{child.label}</span>
+                </div>
+
+                {renderMobileChildren(child.children, level + 1)}
+              </div>
+            );
+          }
+
+          /* -----------------------------------------------
+             FINAL SERVICE
+             ----------------------------------------------- */
+
+          return (
+            <NavLink
+              key={child.path || child.label}
+              to={child.path || "#"}
+              className="website-mobile-service"
+              onClick={closeMobileMenu}
+            >
+              <span className="website-mobile-service-icon">
+                {Icon && <Icon size={17} strokeWidth={1.8} />}
+              </span>
+
+              <span>{child.label}</span>
+
+              <ArrowRight size={14} className="mobile-service-arrow" />
+            </NavLink>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <header className="website-header">
       <div className="website-header-inner">
@@ -526,6 +667,10 @@ function Header() {
         <nav className="website-navigation" aria-label="Main navigation">
           {navigation.map((item) => {
             const hasChildren = item.children && item.children.length > 0;
+
+            /* ---------------------------------------------
+               ITEM WITH CHILDREN
+               --------------------------------------------- */
 
             if (hasChildren) {
               return (
@@ -564,6 +709,8 @@ function Header() {
                     onMouseLeave={closeDesktopServices}
                   >
                     <div className="website-mega-menu-inner">
+                      {/* HEADER */}
+
                       <div className="website-mega-header">
                         <div>
                           <span className="website-mega-eyebrow">
@@ -583,6 +730,7 @@ function Header() {
                           className="website-mega-view-all"
                           onClick={() => {
                             clearDesktopCloseTimer();
+
                             setDesktopServicesOpen(false);
                           }}
                         >
@@ -592,62 +740,50 @@ function Header() {
                         </NavLink>
                       </div>
 
+                      {/* =================================================
+                          LEVEL 1
+                          ================================================= */}
+
                       <div className="website-mega-grid">
-                        {item.children?.map((category) => (
-                          <div
-                            key={category.label}
-                            className="website-mega-column"
-                          >
-                            <div className="website-mega-column-title">
-                              {category.label}
+                        {item.children?.map((category) => {
+                          const CategoryIcon = category.icon;
+
+                          const hasNested =
+                            category.children &&
+                            category.children.some(
+                              (child) =>
+                                child.children && child.children.length > 0,
+                            );
+
+                          return (
+                            <div
+                              key={category.label}
+                              className={`website-mega-column ${
+                                hasNested ? "has-nested" : ""
+                              }`}
+                            >
+                              <div className="website-mega-column-title">
+                                {CategoryIcon && (
+                                  <CategoryIcon size={15} strokeWidth={1.8} />
+                                )}
+
+                                <span>{category.label}</span>
+                              </div>
+
+                              {renderDesktopChildren(category.children, 1)}
                             </div>
-
-                            <div className="website-mega-links">
-                              {category.children?.map((service) => {
-                                const Icon = service.icon;
-
-                                return (
-                                  <NavLink
-                                    key={service.path}
-                                    to={service.path || "#"}
-                                    className="website-mega-link"
-                                    onClick={() => {
-                                      clearDesktopCloseTimer();
-
-                                      setDesktopServicesOpen(false);
-                                    }}
-                                  >
-                                    <span className="website-mega-link-icon">
-                                      {Icon && (
-                                        <Icon size={17} strokeWidth={1.8} />
-                                      )}
-                                    </span>
-
-                                    <span className="website-mega-link-content">
-                                      <strong>{service.label}</strong>
-
-                                      <small>
-                                        {service.description ||
-                                          "Explore solution"}
-                                      </small>
-                                    </span>
-
-                                    <ArrowRight
-                                      size={14}
-                                      className="website-mega-link-arrow"
-                                    />
-                                  </NavLink>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
                 </div>
               );
             }
+
+            /* ---------------------------------------------
+               NORMAL NAVIGATION ITEM
+               --------------------------------------------- */
 
             return (
               <NavLink
@@ -756,6 +892,10 @@ function Header() {
           {navigation.map((item) => {
             const hasChildren = item.children && item.children.length > 0;
 
+            /* ---------------------------------------------
+               MOBILE ITEM WITH CHILDREN
+               --------------------------------------------- */
+
             if (hasChildren) {
               return (
                 <div key={item.path} className="website-mobile-services">
@@ -781,6 +921,8 @@ function Header() {
                       mobileServicesOpen ? "open" : ""
                     }`}
                   >
+                    {/* ALL SERVICES */}
+
                     <NavLink
                       to="/layanan"
                       className="website-mobile-service-all"
@@ -791,44 +933,38 @@ function Header() {
                       <ArrowRight size={15} />
                     </NavLink>
 
-                    {item.children?.map((category) => (
-                      <div
-                        key={category.label}
-                        className="website-mobile-category"
-                      >
-                        <div className="website-mobile-category-title">
-                          {category.label}
+                    {/* =================================================
+                        RECURSIVE MOBILE CONTENT
+                        ================================================= */}
+
+                    {item.children?.map((category) => {
+                      const CategoryIcon = category.icon;
+
+                      return (
+                        <div
+                          key={category.label}
+                          className="website-mobile-category"
+                        >
+                          <div className="website-mobile-category-title">
+                            {CategoryIcon && (
+                              <CategoryIcon size={15} strokeWidth={1.8} />
+                            )}
+
+                            <span>{category.label}</span>
+                          </div>
+
+                          {renderMobileChildren(category.children, 1)}
                         </div>
-
-                        {category.children?.map((service) => {
-                          const Icon = service.icon;
-
-                          return (
-                            <NavLink
-                              key={service.path}
-                              to={service.path || "#"}
-                              className="website-mobile-service"
-                              onClick={closeMobileMenu}
-                            >
-                              <span className="website-mobile-service-icon">
-                                {Icon && <Icon size={17} strokeWidth={1.8} />}
-                              </span>
-
-                              <span>{service.label}</span>
-
-                              <ArrowRight
-                                size={14}
-                                className="mobile-service-arrow"
-                              />
-                            </NavLink>
-                          );
-                        })}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );
             }
+
+            /* ---------------------------------------------
+               NORMAL MOBILE ITEM
+               --------------------------------------------- */
 
             return (
               <NavLink

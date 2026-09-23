@@ -16,6 +16,7 @@ import EmailRoute from "./routes/EmailRoute.js";
 import "./models/index.js";
 
 import userRoutes from "./routes/userRoutes.js";
+import odooRoutes from "./routes/odooRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -108,6 +109,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/email", EmailRoute);
 app.use("/api/users", userRoutes);
+app.use("/api/odoo", odooRoutes);
 
 /* =========================================================
    LOGGER
