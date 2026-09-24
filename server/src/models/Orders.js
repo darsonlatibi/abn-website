@@ -34,6 +34,16 @@ const Orders = db.define(
     },
 
     // =====================================================
+    // ORDER TYPE
+    // =====================================================
+
+    order_type: {
+      type: DataTypes.ENUM("KOPI", "PRODUCT", "EMS_RENTAL", "EMS_LICENSE"),
+      allowNull: false,
+      defaultValue: "PRODUCT",
+    },
+
+    // =====================================================
     // CUSTOMER
     // =====================================================
 

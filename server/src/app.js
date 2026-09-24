@@ -17,6 +17,8 @@ import "./models/index.js";
 
 import userRoutes from "./routes/userRoutes.js";
 import odooRoutes from "./routes/odooRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -110,7 +112,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/email", EmailRoute);
 app.use("/api/users", userRoutes);
 app.use("/api/odoo", odooRoutes);
-
+app.use("/api/orders", orderRoutes);
+app.use("/api/payments", paymentRoutes);
 /* =========================================================
    LOGGER
    ========================================================= */

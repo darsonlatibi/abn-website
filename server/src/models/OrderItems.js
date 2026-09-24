@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import db from "../config/database.js";
 
-const Order_items = db.define(
-  "order_items",
+const OrderItems = db.define(
+  "OrderItems",
   {
     // =====================================================
     // ID
@@ -20,6 +20,15 @@ const Order_items = db.define(
 
     order_id: {
       type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false,
+    },
+
+    // =====================================================
+    // ORDER TYPE
+    // =====================================================
+
+    order_type: {
+      type: DataTypes.ENUM("KOPI", "PRODUCT", "EMS_RENTAL", "EMS_LICENSE"),
       allowNull: false,
     },
 
@@ -44,6 +53,15 @@ const Order_items = db.define(
     product_name: {
       type: DataTypes.STRING(255),
       allowNull: false,
+    },
+
+    // =====================================================
+    // PRODUCT DESCRIPTION
+    // =====================================================
+
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
 
     // =====================================================
@@ -76,12 +94,50 @@ const Order_items = db.define(
     },
 
     // =====================================================
+    // TAX
+    // =====================================================
+
+    tax: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+
+    // =====================================================
     // SUBTOTAL
     // =====================================================
 
     subtotal: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
+    },
+
+    // =====================================================
+    // EMS RENTAL
+    // =====================================================
+
+    rental_days: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true,
+    },
+
+    rental_start: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    rental_end: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    // =====================================================
+    // EMS LICENSE
+    // =====================================================
+
+    license_type: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
     },
 
     // =====================================================
@@ -108,4 +164,4 @@ const Order_items = db.define(
   },
 );
 
-export default Order_items;
+export default OrderItems;
