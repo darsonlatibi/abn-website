@@ -36,6 +36,7 @@ import emailReducer from "../features/email/emailSlice";
 import customSolutionRequestsReducer from "../features/customSolutionRequests/customSolutionRequestsSlice";
 import contactInquiryReducer from "../features/contact/contactInquirySlice";
 import odooReducer from "../features/odoo/odooSlice";
+import midtransReducer from "../features/gateway/midtransSlice";
 /* =========================================================
    ABN FLEET SYSTEM
    REDUX STORE
@@ -72,6 +73,7 @@ export const store = configureStore({
     customSolutionRequests: customSolutionRequestsReducer,
     contactInquiry: contactInquiryReducer,
     odoo: odooReducer,
+    midtrans: midtransReducer,
   },
 
   middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
