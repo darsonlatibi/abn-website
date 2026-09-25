@@ -1,30 +1,30 @@
 import {
   ArrowRight,
-  BarChart3,
+  //BarChart3,
   ChevronDown,
-  Cloud,
-  Code2,
-  Database,
-  Factory,
-  Gauge,
+  // Cloud,
+  // Code2,
+  // Database,
+  // Factory,
+  // Gauge,
   Menu,
   Moon,
-  Network,
-  Radio,
-  Satellite,
-  ServerCog,
-  Settings2,
+  // Network,
+  // Radio,
+  // Satellite,
+  // ServerCog,
+  // Settings2,
   Sun,
-  Truck,
+  //Truck,
   User,
-  Users,
+  //Users,
   X,
-  Wallet,
-  Boxes,
-  ShoppingCart,
-  UsersRound,
-  Coffee,
-  KeyRound,
+  // Wallet,
+  // Boxes,
+  // ShoppingCart,
+  // UsersRound,
+  // Coffee,
+  // KeyRound,
 } from "lucide-react";
 
 import { useEffect, useRef, useState } from "react";
@@ -102,175 +102,175 @@ const getNavigation = (
       label: "Layanan",
       path: "/layanan",
 
-      children: [
-        {
-          label: "ABN EMS & Support",
+      // children: [
+      //   {
+      //     label: "ABN EMS & Support",
 
-          children: [
-            {
-              label: "Support ABN",
-              path: "/layanan/support",
-              icon: Coffee,
-              description: "Dukung pengembangan dan ekosistem ABN.",
-            },
-            {
-              label: "Sewa ABN EMS",
-              path: "/layanan/ems/sewa",
-              icon: KeyRound,
-              description: "Gunakan ABN EMS dengan layanan subscription.",
-            },
-            {
-              label: "Beli ABN EMS",
-              path: "/layanan/ems/beli",
-              icon: ShoppingCart,
-              description: "Dapatkan license ABN EMS untuk perusahaan.",
-            },
-          ],
-        },
+      //     children: [
+      //       {
+      //         label: "Support ABN",
+      //         path: "/layanan/support",
+      //         icon: Coffee,
+      //         description: "Dukung pengembangan dan ekosistem ABN.",
+      //       },
+      //       {
+      //         label: "Sewa ABN EMS",
+      //         path: "/layanan/ems/sewa",
+      //         icon: KeyRound,
+      //         description: "Gunakan ABN EMS dengan layanan subscription.",
+      //       },
+      //       {
+      //         label: "Beli ABN EMS",
+      //         path: "/layanan/ems/beli",
+      //         icon: ShoppingCart,
+      //         description: "Dapatkan license ABN EMS untuk perusahaan.",
+      //       },
+      //     ],
+      //   },
 
-        {
-          label: "Digital & Software",
+      //   {
+      //     label: "Digital & Software",
 
-          children: [
-            {
-              label: "Web & Software Development",
-              path: "/layanan/software-development",
-              icon: Code2,
-            },
-            {
-              label: "System Integration",
-              path: "/layanan/system-integration",
-              icon: Network,
-            },
-            {
-              label: "Data & Analytics",
-              path: "/layanan/data-analytics",
-              icon: BarChart3,
-            },
-          ],
-        },
+      //     children: [
+      //       {
+      //         label: "Web & Software Development",
+      //         path: "/layanan/software-development",
+      //         icon: Code2,
+      //       },
+      //       {
+      //         label: "System Integration",
+      //         path: "/layanan/system-integration",
+      //         icon: Network,
+      //       },
+      //       {
+      //         label: "Data & Analytics",
+      //         path: "/layanan/data-analytics",
+      //         icon: BarChart3,
+      //       },
+      //     ],
+      //   },
 
-        {
-          label: "Industrial Technology",
+      //   {
+      //     label: "Industrial Technology",
 
-          children: [
-            {
-              label: "Industrial IoT",
-              path: "/layanan/industrial-iot",
-              icon: Radio,
-            },
-            {
-              label: "Industrial Automation",
-              path: "/layanan/industrial-automation",
-              icon: Settings2,
-            },
-            {
-              label: "SCADA & Monitoring",
-              path: "/layanan/scada-monitoring",
-              icon: Gauge,
-            },
-            {
-              label: "IoT Hardware & Sensor",
-              path: "/layanan/iot-hardware",
-              icon: Factory,
-            },
-          ],
-        },
+      //     children: [
+      //       {
+      //         label: "Industrial IoT",
+      //         path: "/layanan/industrial-iot",
+      //         icon: Radio,
+      //       },
+      //       {
+      //         label: "Industrial Automation",
+      //         path: "/layanan/industrial-automation",
+      //         icon: Settings2,
+      //       },
+      //       {
+      //         label: "SCADA & Monitoring",
+      //         path: "/layanan/scada-monitoring",
+      //         icon: Gauge,
+      //       },
+      //       {
+      //         label: "IoT Hardware & Sensor",
+      //         path: "/layanan/iot-hardware",
+      //         icon: Factory,
+      //       },
+      //     ],
+      //   },
 
-        {
-          label: "Fleet & Mobility",
+      //   {
+      //     label: "Fleet & Mobility",
 
-          children: [
-            {
-              label: "Fleet Management",
-              path: "/layanan/fleet-management",
-              icon: Truck,
-            },
-            {
-              label: "GPS Tracking",
-              path: "/layanan/gps-tracking",
-              icon: Satellite,
-            },
-          ],
-        },
+      //     children: [
+      //       {
+      //         label: "Fleet Management",
+      //         path: "/layanan/fleet-management",
+      //         icon: Truck,
+      //       },
+      //       {
+      //         label: "GPS Tracking",
+      //         path: "/layanan/gps-tracking",
+      //         icon: Satellite,
+      //       },
+      //     ],
+      //   },
 
-        {
-          label: "Enterprise Management",
+      //   {
+      //     label: "Enterprise Management",
 
-          children: [
-            {
-              label: "HR Management",
-              path: "/layanan/hr",
-              icon: Users,
-            },
-            {
-              label: "Finance Management",
-              path: "/layanan/finance",
-              icon: Wallet,
-            },
-            {
-              label: "Inventory Management",
-              path: "/layanan/inventory",
-              icon: Boxes,
-            },
-            {
-              label: "Procurement Management",
-              path: "/layanan/proc",
-              icon: ShoppingCart,
-            },
-            {
-              label: "CRM",
-              path: "/layanan/crm",
-              icon: UsersRound,
-            },
+      //     children: [
+      //       {
+      //         label: "HR Management",
+      //         path: "/layanan/hr",
+      //         icon: Users,
+      //       },
+      //       {
+      //         label: "Finance Management",
+      //         path: "/layanan/finance",
+      //         icon: Wallet,
+      //       },
+      //       {
+      //         label: "Inventory Management",
+      //         path: "/layanan/inventory",
+      //         icon: Boxes,
+      //       },
+      //       {
+      //         label: "Procurement Management",
+      //         path: "/layanan/proc",
+      //         icon: ShoppingCart,
+      //       },
+      //       {
+      //         label: "CRM",
+      //         path: "/layanan/crm",
+      //         icon: UsersRound,
+      //       },
 
-            /* =================================================
-               ODOO
-               ================================================= */
+      //       /* =================================================
+      //          ODOO
+      //          ================================================= */
 
-            {
-              label: "Odoo ERP",
+      //       {
+      //         label: "Odoo ERP",
 
-              children: [
-                {
-                  label: "Odoo Users",
-                  path: "/odoo/users",
-                  icon: Users,
-                  description: "Kelola dan lihat pengguna dari Odoo ERP.",
-                },
-                {
-                  label: "Odoo Employees",
-                  path: "/odoo/employees",
-                  icon: User,
-                  description: "Data karyawan yang terintegrasi dengan Odoo.",
-                },
-              ],
-            },
-          ],
-        },
+      //         children: [
+      //           {
+      //             label: "Odoo Users",
+      //             path: "/odoo/users",
+      //             icon: Users,
+      //             description: "Kelola dan lihat pengguna dari Odoo ERP.",
+      //           },
+      //           {
+      //             label: "Odoo Employees",
+      //             path: "/odoo/employees",
+      //             icon: User,
+      //             description: "Data karyawan yang terintegrasi dengan Odoo.",
+      //           },
+      //         ],
+      //       },
+      //     ],
+      //   },
 
-        {
-          label: "Infrastructure",
+      //   {
+      //     label: "Infrastructure",
 
-          children: [
-            {
-              label: "Cloud & Infrastructure",
-              path: "/layanan/cloud-infrastructure",
-              icon: Cloud,
-            },
-            {
-              label: "Industrial Data Infrastructure",
-              path: "/layanan/data-infrastructure",
-              icon: Database,
-            },
-            {
-              label: "Server & Network",
-              path: "/layanan/server-network",
-              icon: ServerCog,
-            },
-          ],
-        },
-      ],
+      //     children: [
+      //       {
+      //         label: "Cloud & Infrastructure",
+      //         path: "/layanan/cloud-infrastructure",
+      //         icon: Cloud,
+      //       },
+      //       {
+      //         label: "Industrial Data Infrastructure",
+      //         path: "/layanan/data-infrastructure",
+      //         icon: Database,
+      //       },
+      //       {
+      //         label: "Server & Network",
+      //         path: "/layanan/server-network",
+      //         icon: ServerCog,
+      //       },
+      //     ],
+      //   },
+      // ],
     },
 
     {

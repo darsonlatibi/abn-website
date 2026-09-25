@@ -1,10 +1,16 @@
 import User from "./User.js";
 import Email from "./Email.js";
 import EmailRecipient from "./EmailRecipient.js";
+
+import Products from "./Products.js";
+
 import Order from "./Orders.js";
 import OrderItem from "./OrderItems.js";
+
 import Payment from "./Payment.js";
 import Transaction from "./Transaction.js";
+
+import SupportPayment from "./SupportPayment.js";
 
 /* =========================================================
    ASSOCIATIONS
@@ -41,6 +47,20 @@ OrderItem.belongsTo(Order, {
 });
 
 // =========================================================
+// Product → OrderItems
+// =========================================================
+
+Products.hasMany(OrderItem, {
+  foreignKey: "product_id",
+  as: "orderItems",
+});
+
+OrderItem.belongsTo(Products, {
+  foreignKey: "product_id",
+  as: "product",
+});
+
+// =========================================================
 // Order → Payments
 // =========================================================
 
@@ -57,17 +77,48 @@ Payment.belongsTo(Order, {
 });
 
 // =========================================================
+// SupportPayment
+// =========================================================
+//
+// SupportPayment berdiri sendiri.
+// Tidak memiliki order_id karena transaksi
+// Buy Me a Coffee langsung ke Midtrans.
+//
+// Support:
+//   Support.tsx
+//       ↓
+//   /api/payments/support
+//       ↓
+//   SupportPayment
+//       ↓
+//   Midtrans
+//
+// =========================================================
+
+// =========================================================
 // EXPORT
 // =========================================================
 
-export { User, Email, EmailRecipient, Order, OrderItem, Payment, Transaction };
+export {
+  User,
+  Email,
+  EmailRecipient,
+  Products,
+  Order,
+  OrderItem,
+  Payment,
+  Transaction,
+  SupportPayment,
+};
 
 export default {
   User,
   Email,
   EmailRecipient,
+  Products,
   Order,
   OrderItem,
   Payment,
   Transaction,
+  SupportPayment,
 };

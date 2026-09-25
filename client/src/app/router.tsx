@@ -17,18 +17,18 @@ import CatalogProduct from "../pages/Products/CatalogProduct";
 import Blogs from "../pages/blogs/Blogs";
 import Portfolio from "../pages/portfolio/Portfolio";
 
-import SoftwareDevelopment from "../pages/layanan/SoftwareDevelopment";
-import SystemIntegration from "../pages/layanan/SystemIntegration";
-import DataAnalytics from "../pages/layanan/DataAnalytics";
-import IndustrialIot from "../pages/layanan/IndustrialIot";
-import IndustrialAutomation from "../pages/layanan/IndustrialAutomation";
-import ScadaMonitoring from "../pages/layanan/ScadaMonitoring";
-import IotHardware from "../pages/layanan/IotHardware";
-import FleetManagement from "../pages/layanan/FleetManagement";
-import GpsTracking from "../pages/layanan/GpsTracking";
-import CloudInfrastructure from "../pages/layanan/CloudInfrastructure";
-import DataInfrastructure from "../pages/layanan/DataInfrastructure";
-import ServerNetwork from "../pages/layanan/ServerNetwork";
+// import SoftwareDevelopment from "../pages/layanan/SoftwareDevelopment";
+// import SystemIntegration from "../pages/layanan/SystemIntegration";
+// import DataAnalytics from "../pages/layanan/DataAnalytics";
+// import IndustrialIot from "../pages/layanan/IndustrialIot";
+// import IndustrialAutomation from "../pages/layanan/IndustrialAutomation";
+// import ScadaMonitoring from "../pages/layanan/ScadaMonitoring";
+// import IotHardware from "../pages/layanan/IotHardware";
+// import FleetManagement from "../pages/layanan/FleetManagement";
+// import GpsTracking from "../pages/layanan/GpsTracking";
+// import CloudInfrastructure from "../pages/layanan/CloudInfrastructure";
+// import DataInfrastructure from "../pages/layanan/DataInfrastructure";
+// import ServerNetwork from "../pages/layanan/ServerNetwork";
 
 import Inbox from "../pages/mail/Inbox";
 import Login from "../pages/Login/Login";
@@ -42,12 +42,14 @@ import HR from "../pages/management/HR";
 import Inventory from "../pages/management/Inventory";
 import Procurement from "../pages/management/Procurement";
 import CRM from "../pages/management/CRM";
-import Support from "../pages/Support/Support";
-import BeliEMS from "../pages/EMS/Beli/BeliEMS";
-import SewaEMS from "../pages/EMS/Sewa/SewaEMS";
+// import Support from "../pages/layanan/Support/Support";
+// import BeliEMS from "../pages/layanan/EMS/Beli/BeliEMS";
+// import SewaEMS from "../pages/layanan/EMS/Sewa/SewaEMS";
 import OdooEmployees from "../pages/odoo/OdooEmployees";
 import OdooUsers from "../pages/odoo/OdooUsers";
 import Checkout from "../pages/checkout/Checkout";
+import ProductsForSale from "../pages/Products/ProductsForSale";
+import Layanan from "../pages/layanan/Layanan";
 
 /* =========================================================
    ABN CORPORATE WEBSITE
@@ -72,10 +74,17 @@ function AppRouter() {
         <Route path="/about" element={<About />} />
 
         {/* Layanan */}
-        <Route path="/layanan/support" element={<Support />} />
+        <Route path="/layanan" element={<Layanan />} />
+        {/* <Route path="/layanan/support" element={<Support />} />
         <Route path="/layanan/ems/beli" element={<BeliEMS />} />
-        <Route path="/layanan/ems/sewa" element={<SewaEMS />} />
+        <Route path="/layanan/ems/sewa" element={<SewaEMS />} /> */}
+
         <Route
+          path="/layanan/products-for-sale"
+          element={<ProductsForSale />}
+        />
+
+        {/* <Route
           path="/layanan/software-development"
           element={<SoftwareDevelopment />}
         />
@@ -98,7 +107,7 @@ function AppRouter() {
 
         <Route path="/layanan/iot-hardware" element={<IotHardware />} />
 
-        <Route path="/layanan/fleet-management" element={<FleetManagement />} />
+        <Route path="/layanan/fleet-management" element={<FleetManagement />} /> */}
 
         <Route path="/layanan/hr" element={<HR />} />
 
@@ -107,7 +116,7 @@ function AppRouter() {
         <Route path="/layanan/proc" element={<Procurement />} />
         <Route path="/layanan/crm" element={<CRM />} />
 
-        <Route path="/layanan/gps-tracking" element={<GpsTracking />} />
+        {/* <Route path="/layanan/gps-tracking" element={<GpsTracking />} />
 
         <Route
           path="/layanan/cloud-infrastructure"
@@ -119,7 +128,7 @@ function AppRouter() {
           element={<DataInfrastructure />}
         />
 
-        <Route path="/layanan/server-network" element={<ServerNetwork />} />
+        <Route path="/layanan/server-network" element={<ServerNetwork />} /> */}
 
         <Route path="/blog" element={<Blogs />} />
         <Route path="/portfolio" element={<Portfolio />} />

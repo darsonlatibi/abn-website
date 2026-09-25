@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
-import db from "../config/database.js";
-import { Order, OrderItem, User } from "../models/index.js";
+import sequelize from "../config/database.js";
+
+import { Order, OrderItem, Products } from "../models/index.js";
 
 // =====================================================
 // CONSTANTS
@@ -17,8 +18,6 @@ const ORDER_STATUSES = [
   "EXPIRED",
   "REFUNDED",
 ];
-
-const PAYMENT_STATUSES = ["PENDING", "PAID", "FAILED", "EXPIRED", "REFUNDED"];
 
 // =====================================================
 // HELPERS
@@ -55,7 +54,7 @@ const sendError = (res, status, message) =>
 // =====================================================
 
 export const createOrder = async (req, res) => {
-  const transaction = await db.transaction();
+  const transaction = await sequelize.transaction();
 
   try {
     const {
@@ -65,17 +64,13 @@ export const createOrder = async (req, res) => {
       customer_email,
       items,
       discount = 0,
-      tax = 0,
       shipping_cost = 0,
-      payment_method = "MIDTRANS",
-      rental_start = null,
-      rental_end = null,
       notes = null,
     } = req.body;
 
-    // -------------------------------------------------
+    // =================================================
     // VALIDATE ORDER TYPE
-    // -------------------------------------------------
+    // =================================================
 
     if (!ORDER_TYPES.includes(order_type)) {
       await transaction.rollback();
@@ -87,9 +82,9 @@ export const createOrder = async (req, res) => {
       );
     }
 
-    // -------------------------------------------------
+    // =================================================
     // VALIDATE CUSTOMER
-    // -------------------------------------------------
+    // =================================================
 
     if (!customer_name || !customer_email) {
       await transaction.rollback();
@@ -101,9 +96,9 @@ export const createOrder = async (req, res) => {
       );
     }
 
-    // -------------------------------------------------
+    // =================================================
     // VALIDATE ITEMS
-    // -------------------------------------------------
+    // =================================================
 
     if (!Array.isArray(items) || items.length === 0) {
       await transaction.rollback();
@@ -111,12 +106,12 @@ export const createOrder = async (req, res) => {
       return sendError(res, 400, "Order must contain at least one item");
     }
 
-    // -------------------------------------------------
+    // =================================================
     // VALIDATE RENTAL DATES
-    // -------------------------------------------------
+    // =================================================
 
     if (order_type === "EMS_RENTAL") {
-      if (!rental_start || !rental_end) {
+      if (!req.body.rental_start || !req.body.rental_end) {
         await transaction.rollback();
 
         return sendError(
@@ -126,8 +121,8 @@ export const createOrder = async (req, res) => {
         );
       }
 
-      const startDate = new Date(rental_start);
-      const endDate = new Date(rental_end);
+      const startDate = new Date(req.body.rental_start);
+      const endDate = new Date(req.body.rental_end);
 
       if (
         Number.isNaN(startDate.getTime()) ||
@@ -140,25 +135,33 @@ export const createOrder = async (req, res) => {
       }
     }
 
-    // -------------------------------------------------
+    // =================================================
     // PREPARE ORDER ITEMS
-    // -------------------------------------------------
+    // =================================================
 
     let subtotal = 0;
+    let calculatedTax = 0;
 
     const orderItems = [];
 
     for (const item of items) {
-      const product_id = Number(item.product_id);
+      const productId = Number(item.product_id);
       const quantity = Number(item.quantity);
-      const unit_price = toNumber(item.unit_price);
       const itemDiscount = toNumber(item.discount, 0);
 
-      if (!Number.isSafeInteger(product_id) || product_id <= 0) {
+      // -------------------------------------------------
+      // PRODUCT ID
+      // -------------------------------------------------
+
+      if (!Number.isSafeInteger(productId) || productId <= 0) {
         await transaction.rollback();
 
         return sendError(res, 400, "Each item requires a valid product_id");
       }
+
+      // -------------------------------------------------
+      // QUANTITY
+      // -------------------------------------------------
 
       if (!Number.isSafeInteger(quantity) || quantity <= 0) {
         await transaction.rollback();
@@ -170,28 +173,91 @@ export const createOrder = async (req, res) => {
         );
       }
 
-      if (
-        !Number.isFinite(unit_price) ||
-        unit_price < 0 ||
-        !Number.isFinite(itemDiscount) ||
-        itemDiscount < 0
-      ) {
+      // -------------------------------------------------
+      // ITEM DISCOUNT
+      // -------------------------------------------------
+
+      if (!Number.isFinite(itemDiscount) || itemDiscount < 0) {
         await transaction.rollback();
 
-        return sendError(res, 400, "Invalid unit_price or item discount");
+        return sendError(res, 400, "Invalid item discount");
       }
 
-      if (!item.product_code || !item.product_name) {
+      // =================================================
+      // LOAD PRODUCT FROM DATABASE
+      //
+      // IMPORTANT:
+      // Harga, nama, product code dan tax berasal dari DB.
+      // Client tidak boleh menentukan harga sendiri.
+      // =================================================
+
+      const product = await Products.findByPk(productId, {
+        transaction,
+
+        // Lock row supaya stock aman ketika ada
+        // transaksi bersamaan.
+        lock: transaction.LOCK.UPDATE,
+      });
+
+      if (!product) {
+        await transaction.rollback();
+
+        return sendError(res, 404, `Product ${productId} not found`);
+      }
+
+      // -------------------------------------------------
+      // STOCK
+      // -------------------------------------------------
+
+      const currentStock = Number(product.stock || 0);
+
+      if (currentStock < quantity) {
         await transaction.rollback();
 
         return sendError(
           res,
           400,
-          "Each item requires product_code and product_name",
+          `Insufficient stock for product "${product.name}". Available: ${currentStock}`,
         );
       }
 
-      const lineGross = roundMoney(quantity * unit_price);
+      // -------------------------------------------------
+      // PRICE FROM DATABASE
+      // -------------------------------------------------
+
+      const unitPrice = Number(product.price);
+
+      if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+        await transaction.rollback();
+
+        return sendError(
+          res,
+          500,
+          `Invalid price configured for product "${product.name}"`,
+        );
+      }
+
+      // -------------------------------------------------
+      // TAX FROM DATABASE
+      // -------------------------------------------------
+
+      const taxPercent = Number(product.tax_percent || 0);
+
+      if (!Number.isFinite(taxPercent) || taxPercent < 0) {
+        await transaction.rollback();
+
+        return sendError(
+          res,
+          500,
+          `Invalid tax configuration for product "${product.name}"`,
+        );
+      }
+
+      // =================================================
+      // CALCULATE LINE
+      // =================================================
+
+      const lineGross = roundMoney(quantity * unitPrice);
 
       if (itemDiscount > lineGross) {
         await transaction.rollback();
@@ -199,44 +265,63 @@ export const createOrder = async (req, res) => {
         return sendError(
           res,
           400,
-          "Item discount cannot exceed its gross amount",
+          `Discount cannot exceed gross amount for product "${product.name}"`,
         );
       }
 
       const lineSubtotal = roundMoney(lineGross - itemDiscount);
 
+      // Tax dihitung setelah discount item.
+      const lineTax = roundMoney(lineSubtotal * (taxPercent / 100));
+
       subtotal = roundMoney(subtotal + lineSubtotal);
 
+      calculatedTax = roundMoney(calculatedTax + lineTax);
+
+      // =================================================
+      // SNAPSHOT ORDER ITEM
+      // =================================================
+
       orderItems.push({
-        product_id,
-        product_code: item.product_code,
-        product_name: item.product_name,
+        product_id: product.id,
+
+        // Gunakan UUID product sebagai product code.
+        product_code: product.product_id,
+
+        // Snapshot nama saat order dibuat.
+        product_name: product.name,
+
         quantity,
-        unit_price,
+
+        // Harga resmi dari database.
+        unit_price: unitPrice,
+
         discount: itemDiscount,
+
         subtotal: lineSubtotal,
+      });
+
+      // =================================================
+      // REDUCE STOCK
+      // =================================================
+
+      product.stock = currentStock - quantity;
+
+      await product.save({
+        transaction,
       });
     }
 
-    // -------------------------------------------------
-    // CALCULATE TOTAL
-    // -------------------------------------------------
+    // =================================================
+    // ORDER DISCOUNT
+    // =================================================
 
-    const orderDiscount = toNumber(discount);
-    const orderTax = toNumber(tax);
-    const orderShipping = toNumber(shipping_cost);
+    const orderDiscount = toNumber(discount, 0);
 
-    if (
-      !Number.isFinite(orderDiscount) ||
-      !Number.isFinite(orderTax) ||
-      !Number.isFinite(orderShipping) ||
-      orderDiscount < 0 ||
-      orderTax < 0 ||
-      orderShipping < 0
-    ) {
+    if (!Number.isFinite(orderDiscount) || orderDiscount < 0) {
       await transaction.rollback();
 
-      return sendError(res, 400, "Invalid discount, tax, or shipping_cost");
+      return sendError(res, 400, "Invalid order discount");
     }
 
     if (orderDiscount > subtotal) {
@@ -245,8 +330,24 @@ export const createOrder = async (req, res) => {
       return sendError(res, 400, "Order discount cannot exceed subtotal");
     }
 
+    // =================================================
+    // SHIPPING
+    // =================================================
+
+    const orderShipping = toNumber(shipping_cost, 0);
+
+    if (!Number.isFinite(orderShipping) || orderShipping < 0) {
+      await transaction.rollback();
+
+      return sendError(res, 400, "Invalid shipping_cost");
+    }
+
+    // =================================================
+    // GRAND TOTAL
+    // =================================================
+
     const grandTotal = roundMoney(
-      subtotal - orderDiscount + orderTax + orderShipping,
+      subtotal - orderDiscount + calculatedTax + orderShipping,
     );
 
     if (grandTotal <= 0) {
@@ -255,15 +356,15 @@ export const createOrder = async (req, res) => {
       return sendError(res, 400, "Order grand_total must be greater than zero");
     }
 
-    // -------------------------------------------------
+    // =================================================
     // CREATE ORDER
-    // -------------------------------------------------
+    // =================================================
 
     const order = await Order.create(
       {
         order_number: generateOrderNumber(),
 
-        // Use authenticated user ID when available.
+        // Dari authenticated user jika tersedia.
         user_id: req.user?.id ?? null,
 
         order_type,
@@ -273,27 +374,27 @@ export const createOrder = async (req, res) => {
         customer_email,
 
         subtotal,
+
         discount: orderDiscount,
-        tax: orderTax,
+
+        tax: calculatedTax,
+
         shipping_cost: orderShipping,
+
         grand_total: grandTotal,
 
-        payment_method,
-        payment_status: "PENDING",
-
-        rental_start: order_type === "EMS_RENTAL" ? rental_start : null,
-
-        rental_end: order_type === "EMS_RENTAL" ? rental_end : null,
-
         status: "PENDING",
+
         notes,
       },
-      { transaction },
+      {
+        transaction,
+      },
     );
 
-    // -------------------------------------------------
+    // =================================================
     // CREATE ORDER ITEMS
-    // -------------------------------------------------
+    // =================================================
 
     const itemsWithOrderId = orderItems.map((item) => ({
       ...item,
@@ -304,15 +405,15 @@ export const createOrder = async (req, res) => {
       transaction,
     });
 
-    // -------------------------------------------------
+    // =================================================
     // COMMIT
-    // -------------------------------------------------
+    // =================================================
 
     await transaction.commit();
 
-    // -------------------------------------------------
-    // RESPONSE
-    // -------------------------------------------------
+    // =================================================
+    // LOAD CREATED ORDER
+    // =================================================
 
     const createdOrder = await Order.findByPk(order.id, {
       include: [
@@ -322,6 +423,10 @@ export const createOrder = async (req, res) => {
         },
       ],
     });
+
+    // =================================================
+    // RESPONSE
+    // =================================================
 
     return res.status(201).json({
       success: true,
@@ -356,11 +461,16 @@ export const getOrders = async (req, res) => {
     } = req.query;
 
     const pageNumber = Math.max(1, parseInt(page, 10) || 1);
+
     const pageSize = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
 
     const offset = (pageNumber - 1) * pageSize;
 
     const where = {};
+
+    // -------------------------------------------------
+    // STATUS FILTER
+    // -------------------------------------------------
 
     if (status) {
       if (!ORDER_STATUSES.includes(status)) {
@@ -370,6 +480,10 @@ export const getOrders = async (req, res) => {
       where.status = status;
     }
 
+    // -------------------------------------------------
+    // ORDER TYPE FILTER
+    // -------------------------------------------------
+
     if (order_type) {
       if (!ORDER_TYPES.includes(order_type)) {
         return sendError(res, 400, "Invalid order_type");
@@ -378,9 +492,17 @@ export const getOrders = async (req, res) => {
       where.order_type = order_type;
     }
 
+    // -------------------------------------------------
+    // USER FILTER
+    // -------------------------------------------------
+
     if (user_id) {
       where.user_id = user_id;
     }
+
+    // -------------------------------------------------
+    // SEARCH
+    // -------------------------------------------------
 
     if (search) {
       where[Op.or] = [
@@ -402,16 +524,24 @@ export const getOrders = async (req, res) => {
       ];
     }
 
+    // -------------------------------------------------
+    // QUERY
+    // -------------------------------------------------
+
     const { count, rows } = await Order.findAndCountAll({
       where,
+
       include: [
         {
           model: OrderItem,
           as: "items",
         },
       ],
+
       distinct: true,
+
       order: [["created_at", "DESC"]],
+
       limit: pageSize,
       offset,
     });
@@ -419,7 +549,9 @@ export const getOrders = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Orders retrieved successfully",
+
       data: rows,
+
       pagination: {
         total: count,
         page: pageNumber,
@@ -447,6 +579,7 @@ export const getOrderByNumber = async (req, res) => {
       where: {
         order_number: orderNumber,
       },
+
       include: [
         {
           model: OrderItem,
@@ -479,6 +612,7 @@ export const getOrderByNumber = async (req, res) => {
 export const updateOrderStatus = async (req, res) => {
   try {
     const { orderNumber } = req.params;
+
     const { status } = req.body;
 
     if (!ORDER_STATUSES.includes(status)) {
@@ -495,7 +629,9 @@ export const updateOrderStatus = async (req, res) => {
       return sendError(res, 404, "Order not found");
     }
 
-    await order.update({ status });
+    await order.update({
+      status,
+    });
 
     return res.status(200).json({
       success: true,

@@ -1,5 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 import api from "../../api/axios";
@@ -8,28 +7,26 @@ import api from "../../api/axios";
 // TYPES
 // =========================================================
 
-export interface MidtransItem {
-  id: string;
-  price: number;
-  quantity: number;
-  name: string;
-}
-
 export interface CreateMidtransPayload {
-  orderId: string;
-  amount: number;
+  orderNumber: string;
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
-  itemDetails?: MidtransItem[];
-  finishUrl?: string;
 }
 
-export interface MidtransTransaction {
-  orderId?: string;
+export interface MidtransPaymentData {
+  paymentId?: number;
+  paymentNumber?: string;
+
+  orderNumber?: string;
   order_id?: string;
 
-  token?: string;
+  amount?: number | string;
+
+  status?: string;
+
+  snapToken?: string | null;
+  token?: string | null;
 
   paymentUrl?: string | null;
   redirectUrl?: string | null;
@@ -39,8 +36,6 @@ export interface MidtransTransaction {
   transaction_status?: string;
   fraud_status?: string;
   payment_type?: string;
-
-  status?: string;
 
   gross_amount?: string | number;
 
@@ -64,9 +59,9 @@ export interface MidtransState {
 
   currentOrderId: string | null;
 
-  currentTransaction: MidtransTransaction | null;
+  currentTransaction: MidtransPaymentData | null;
 
-  transactions: MidtransTransaction[];
+  transactions: MidtransPaymentData[];
 
   paymentStatus: string;
 
@@ -74,7 +69,7 @@ export interface MidtransState {
 }
 
 // =========================================================
-// HELPER
+// ERROR HELPER
 // =========================================================
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
@@ -103,70 +98,91 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
 };
 
 // =========================================================
-// CREATE MIDTRANS TRANSACTION
-// POST /api/payment/trans/create
+// CREATE PAYMENT
+//
+// POST /api/payments/create
+//
+// Backend menentukan:
+// - grand_total
+// - payment amount
+// - Midtrans order
 // =========================================================
 
 export const createMidtransTransaction = createAsyncThunk<
-  MidtransResponse<MidtransTransaction>,
+  MidtransResponse<MidtransPaymentData>,
   CreateMidtransPayload,
   {
     rejectValue: string;
   }
 >(
-  "midtrans/createTransaction",
+  "midtrans/createPayment",
 
   async (payload, thunkAPI) => {
     try {
-      const response = await api.post<MidtransResponse<MidtransTransaction>>(
-        "/payment/trans/create",
-        payload,
+      if (!payload.orderNumber) {
+        return thunkAPI.rejectWithValue("Order number is required.");
+      }
+
+      if (!payload.customerName) {
+        return thunkAPI.rejectWithValue("Customer name is required.");
+      }
+
+      if (!payload.customerEmail) {
+        return thunkAPI.rejectWithValue("Customer email is required.");
+      }
+
+      const response = await api.post<MidtransResponse<MidtransPaymentData>>(
+        "/payments/create",
+        {
+          order_number: payload.orderNumber,
+          customer_name: payload.customerName,
+          customer_email: payload.customerEmail,
+          customer_phone: payload.customerPhone || undefined,
+        },
       );
 
       return response.data;
     } catch (error: unknown) {
-      console.error("MIDTRANS CREATE THUNK:", error);
+      console.error("MIDTRANS CREATE PAYMENT THUNK:", error);
 
       return thunkAPI.rejectWithValue(
-        getErrorMessage(error, "Failed to create Midtrans transaction."),
+        getErrorMessage(error, "Failed to create payment."),
       );
     }
   },
 );
 
 // =========================================================
-// GET MIDTRANS TRANSACTION STATUS
-// GET /api/payment/trans/status/:orderId
+// GET PAYMENT STATUS
+//
+// GET /api/payments/:orderNumber/status
 // =========================================================
 
 export const getMidtransTransactionStatus = createAsyncThunk<
-  MidtransResponse<MidtransTransaction>,
+  MidtransResponse<MidtransPaymentData>,
   string,
   {
     rejectValue: string;
   }
 >(
-  "midtrans/getTransactionStatus",
+  "midtrans/getPaymentStatus",
 
-  async (orderId, thunkAPI) => {
+  async (orderNumber, thunkAPI) => {
     try {
-      if (!orderId) {
-        return thunkAPI.rejectWithValue("Order ID is required.");
+      if (!orderNumber) {
+        return thunkAPI.rejectWithValue("Order number is required.");
       }
 
-      const response = await api.get<MidtransResponse<MidtransTransaction>>(
-        `/payment/trans/status/${encodeURIComponent(orderId)}`,
+      const response = await api.get<MidtransResponse<MidtransPaymentData>>(
+        `/payments/${encodeURIComponent(orderNumber)}/status`,
       );
 
       return response.data;
     } catch (error: unknown) {
-      console.error("MIDTRANS STATUS THUNK:", error);
+      console.error("MIDTRANS PAYMENT STATUS THUNK:", error);
 
       return thunkAPI.rejectWithValue(
-        getErrorMessage(
-          error,
-          "Failed to retrieve Midtrans transaction status.",
-        ),
+        getErrorMessage(error, "Failed to retrieve payment status."),
       );
     }
   },
@@ -174,11 +190,13 @@ export const getMidtransTransactionStatus = createAsyncThunk<
 
 // =========================================================
 // FETCH TRANSACTIONS
-// GET /api/payment/trans/transactions
+//
+// Optional endpoint.
+// Keep this thunk for future admin/payment history.
 // =========================================================
 
 export const fetchTransactions = createAsyncThunk<
-  MidtransResponse<MidtransTransaction[]>,
+  MidtransResponse<MidtransPaymentData[]>,
   void,
   {
     rejectValue: string;
@@ -188,8 +206,8 @@ export const fetchTransactions = createAsyncThunk<
 
   async (_, thunkAPI) => {
     try {
-      const response = await api.get<MidtransResponse<MidtransTransaction[]>>(
-        "/payment/trans/transactions",
+      const response = await api.get<MidtransResponse<MidtransPaymentData[]>>(
+        "/payments/transactions",
       );
 
       return response.data;
@@ -262,7 +280,7 @@ const midtransSlice = createSlice({
     },
 
     // =====================================================
-    // CLEAR PAYMENT ONLY
+    // CLEAR CURRENT PAYMENT
     // =====================================================
 
     clearMidtransPayment: (state) => {
@@ -287,33 +305,39 @@ const midtransSlice = createSlice({
 
     paymentUpdatedRealtime: (
       state,
-      action: PayloadAction<Partial<MidtransTransaction>>,
+      action: PayloadAction<Partial<MidtransPaymentData>>,
     ) => {
-      const { order_id, status, transaction_status } = action.payload;
+      const { order_id, orderNumber, status, transaction_status } =
+        action.payload;
+
+      const targetOrder = orderNumber || order_id;
 
       const newStatus = transaction_status || status;
 
-      state.transactions = state.transactions.map((trx) =>
-        trx.order_id === order_id
-          ? {
-              ...trx,
+      state.transactions = state.transactions.map((trx) => {
+        const trxOrder = trx.orderNumber || trx.order_id;
 
-              ...action.payload,
+        if (trxOrder !== targetOrder) {
+          return trx;
+        }
 
-              status: newStatus,
+        return {
+          ...trx,
+          ...action.payload,
+          status: newStatus || trx.status,
+          transaction_status: transaction_status || trx.transaction_status,
+        };
+      });
 
-              transaction_status: transaction_status || trx.transaction_status,
-            }
-          : trx,
-      );
+      const currentOrder = state.currentOrderId;
 
-      if (state.currentOrderId === order_id && state.currentTransaction) {
+      if (currentOrder === targetOrder && state.currentTransaction) {
         state.currentTransaction = {
           ...state.currentTransaction,
 
           ...action.payload,
 
-          status: newStatus,
+          status: newStatus || state.currentTransaction.status,
 
           transaction_status:
             transaction_status || state.currentTransaction.transaction_status,
@@ -330,7 +354,7 @@ const midtransSlice = createSlice({
     builder
 
       // ===================================================
-      // CREATE TRANSACTION
+      // CREATE PAYMENT
       // ===================================================
 
       .addCase(createMidtransTransaction.pending, (state) => {
@@ -346,9 +370,9 @@ const midtransSlice = createSlice({
 
         const response = action.payload || {};
 
-        const data = response.data || response;
+        const data = response.data || {};
 
-        state.snapToken = data.token || null;
+        state.snapToken = data.snapToken || data.token || null;
 
         state.paymentUrl =
           data.paymentUrl || data.redirectUrl || data.redirect_url || null;
@@ -356,11 +380,11 @@ const midtransSlice = createSlice({
         state.redirectUrl =
           data.redirectUrl || data.redirect_url || data.paymentUrl || null;
 
-        state.currentOrderId = data.orderId || data.order_id || null;
+        state.currentOrderId = data.orderNumber || data.order_id || null;
 
         state.currentTransaction = data;
 
-        state.paymentStatus = "ready";
+        state.paymentStatus = data.status || "ready";
 
         state.error = null;
       })
@@ -368,14 +392,13 @@ const midtransSlice = createSlice({
       .addCase(createMidtransTransaction.rejected, (state, action) => {
         state.loading = false;
 
-        state.error =
-          action.payload || "Failed to create Midtrans transaction.";
+        state.error = action.payload || "Failed to create payment.";
 
         state.paymentStatus = "failed";
       })
 
       // ===================================================
-      // GET TRANSACTION STATUS
+      // GET PAYMENT STATUS
       // ===================================================
 
       .addCase(getMidtransTransactionStatus.pending, (state) => {
@@ -389,12 +412,15 @@ const midtransSlice = createSlice({
 
         const response = action.payload || {};
 
-        const data = response.data || response;
+        const data = response.data || {};
 
         state.currentTransaction = data;
 
+        state.currentOrderId =
+          data.orderNumber || data.order_id || state.currentOrderId;
+
         state.paymentStatus =
-          data.transaction_status || data.status || "unknown";
+          data.status || data.transaction_status || "unknown";
 
         state.error = null;
       })
@@ -420,7 +446,7 @@ const midtransSlice = createSlice({
 
         const response = action.payload || {};
 
-        const data = response.data || response.transactions || [];
+        const data = response.data || [];
 
         state.transactions = Array.isArray(data) ? data : [];
 
@@ -436,7 +462,7 @@ const midtransSlice = createSlice({
 });
 
 // =========================================================
-// EXPORT ACTIONS
+// ACTIONS
 // =========================================================
 
 export const {
@@ -446,7 +472,7 @@ export const {
 } = midtransSlice.actions;
 
 // =========================================================
-// EXPORT REDUCER
+// REDUCER
 // =========================================================
 
 export default midtransSlice.reducer;

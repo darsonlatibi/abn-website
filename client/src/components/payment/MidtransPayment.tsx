@@ -1,24 +1,24 @@
 import { useState } from "react";
+
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
+
 import {
   createMidtransTransaction,
   getMidtransTransactionStatus,
 } from "../../features/gateway/midtransSlice";
 
 interface MidtransPaymentProps {
-  amount: number;
+  orderNumber: string;
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
-  orderId: string;
 }
 
 const MidtransPayment = ({
-  amount,
+  orderNumber,
   customerName,
   customerEmail,
   customerPhone,
-  orderId,
 }: MidtransPaymentProps) => {
   const dispatch = useAppDispatch();
 
@@ -31,28 +31,26 @@ const MidtransPayment = ({
   const handlePayment = async () => {
     setMessage("");
 
+    if (!orderNumber) {
+      setMessage("Nomor order tidak tersedia.");
+      return;
+    }
+
     try {
       const result = await dispatch(
         createMidtransTransaction({
-          orderId,
-          amount,
+          orderNumber,
           customerName,
           customerEmail,
           customerPhone,
-          itemDetails: [
-            {
-              id: "ABN-PAYMENT",
-              price: amount,
-              quantity: 1,
-              name: "ABN Website Payment",
-            },
-          ],
         }),
       ).unwrap();
 
       const data = result.data;
 
-      if (!data?.token) {
+      const token = data?.snapToken || data?.token;
+
+      if (!token) {
         throw new Error("Snap token tidak tersedia.");
       }
 
@@ -60,25 +58,40 @@ const MidtransPayment = ({
         throw new Error("Midtrans Snap.js belum tersedia.");
       }
 
-      window.snap.pay(data.token, {
+      window.snap.pay(token, {
         onSuccess: async () => {
           setMessage("Pembayaran berhasil. Memverifikasi...");
 
-          await dispatch(getMidtransTransactionStatus(orderId));
+          try {
+            await dispatch(getMidtransTransactionStatus(orderNumber)).unwrap();
 
-          setMessage("Pembayaran berhasil.");
+            setMessage("Pembayaran berhasil.");
+          } catch {
+            setMessage(
+              "Pembayaran berhasil, tetapi verifikasi status sedang diproses.",
+            );
+          }
         },
 
         onPending: async () => {
           setMessage("Pembayaran masih menunggu.");
 
-          await dispatch(getMidtransTransactionStatus(orderId));
+          try {
+            await dispatch(getMidtransTransactionStatus(orderNumber)).unwrap();
+          } catch {
+            // Status dapat diverifikasi kembali
+            // melalui endpoint status.
+          }
         },
 
         onError: async () => {
           setMessage("Pembayaran gagal.");
 
-          await dispatch(getMidtransTransactionStatus(orderId));
+          try {
+            await dispatch(getMidtransTransactionStatus(orderNumber)).unwrap();
+          } catch {
+            // Ignore status lookup error here.
+          }
         },
 
         onClose: () => {
@@ -96,14 +109,16 @@ const MidtransPayment = ({
     }
   };
 
+  const isPaid = String(paymentStatus).toUpperCase() === "PAID";
+
   return (
     <div className="midtrans-payment">
       <button
         type="button"
         onClick={handlePayment}
-        disabled={loading || paymentStatus === "PAID"}
+        disabled={loading || isPaid}
       >
-        {loading ? "Memproses..." : "Bayar Sekarang"}
+        {loading ? "Memproses..." : isPaid ? "Sudah Dibayar" : "Bayar Sekarang"}
       </button>
 
       {message && <div style={{ marginTop: 10 }}>{message}</div>}
@@ -119,7 +134,7 @@ const MidtransPayment = ({
         </div>
       )}
 
-      {snapToken && <div style={{ marginTop: 10 }}>Snap Token tersedia.</div>}
+      {snapToken && <div style={{ marginTop: 10 }}>Snap siap digunakan.</div>}
     </div>
   );
 };

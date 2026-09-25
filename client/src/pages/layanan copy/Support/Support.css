@@ -1221,3 +1221,210 @@
     bottom: 7%;
   }
 }
+
+/* =========================================================
+   SUPPORT PAYMENT / COFFEE AMOUNT
+   ========================================================= */
+
+.support-coffee-payment {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.support-coffee-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.support-coffee-title strong {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.support-amount-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.support-amount-btn {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  padding: 10px 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.82);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.support-amount-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.support-amount-btn-active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: currentColor;
+  color: #fff;
+}
+
+.support-amount-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.support-pay-btn {
+  width: 100%;
+  min-height: 48px;
+
+  margin-top: 14px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 12px 18px;
+
+  border: 0;
+  border-radius: 11px;
+
+  background: #fff;
+  color: #111;
+
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.support-pay-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.support-pay-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.support-pay-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.support-payment-note {
+  display: block;
+  margin-top: 10px;
+
+  text-align: center;
+
+  font-size: 11px;
+  line-height: 1.5;
+
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* =========================================================
+   SUPPORT PAYMENT ERROR
+   ========================================================= */
+
+.support-payment-error {
+  margin-top: 14px;
+  padding: 10px 14px;
+
+  border: 1px solid rgba(255, 80, 80, 0.25);
+  border-radius: 9px;
+
+  background: rgba(255, 60, 60, 0.08);
+  color: #ffb4b4;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   BUTTON RESET
+   ========================================================= */
+
+.support-btn,
+.support-inline-link,
+.support-card-link {
+  font: inherit;
+  cursor: pointer;
+}
+
+.support-btn {
+  border: none;
+}
+
+.support-inline-link,
+.support-card-link {
+  border: none;
+  background: transparent;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 0;
+}
+
+.support-inline-link:disabled,
+.support-card-link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 520px) {
+  .support-amount-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .support-coffee-title {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .support-pay-btn {
+    min-height: 50px;
+  }
+}

@@ -9,6 +9,19 @@ import "./Footer.css";
    WEBSITE FOOTER
    ========================================================= */
 
+/* =========================================================
+   OFFICE LOCATION
+   ========================================================= */
+
+const officeLocation = {
+  name: "PT. Agro Berkah Nusantara",
+
+  address:
+    "Jl. Barata Jaya VII No.18, Baratajaya, Kec. Gubeng, Surabaya, Jawa Timur 60284",
+
+  mapsUrl: "https://share.google/TJUajzLpebs42hWes",
+};
+
 const companyLinks = [
   { label: "About", path: "/about" },
   { label: "Projects", path: "/projects" },
@@ -69,7 +82,12 @@ function Footer() {
               and operational environments through data, technology, IoT,
               automation and AI.
             </p>
+
             <div className="website-footer-contact-list">
+              {/* =================================================
+                  EMAIL
+                  ================================================= */}
+
               <a
                 href="mailto:sales@abn.web.id"
                 className="website-footer-contact"
@@ -79,18 +97,63 @@ function Footer() {
                 <span>sales@abn.web.id</span>
               </a>
 
+              {/* =================================================
+                  PHONE
+                  ================================================= */}
+
               <a href="tel:+620000000000" className="website-footer-contact">
                 <Phone size={15} strokeWidth={1.8} />
 
                 <span>Contact Office</span>
               </a>
 
-              <div className="website-footer-contact">
+              {/* =================================================
+                  OFFICE ADDRESS
+                  ================================================= */}
+
+              <a
+                href={officeLocation.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="website-footer-contact website-footer-location"
+                aria-label="Open ABN office location in Google Maps"
+              >
                 <MapPin size={15} strokeWidth={1.8} />
 
-                <span>Indonesia</span>
-              </div>
+                <span>{officeLocation.address}</span>
+              </a>
             </div>
+
+            {/* =================================================
+                OFFICE LOCATION CARD
+                ================================================= */}
+
+            <a
+              href={officeLocation.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="website-footer-map-card"
+              aria-label="Open ABN office location in Google Maps"
+            >
+              <div className="website-footer-map-overlay">
+                <MapPin size={30} strokeWidth={1.5} />
+
+                <strong>{officeLocation.name}</strong>
+
+                <span>
+                  Jl. Barata Jaya VII No.18
+                  <br />
+                  Baratajaya, Kec. Gubeng
+                  <br />
+                  Surabaya, Jawa Timur 60284
+                </span>
+
+                <small>
+                  Open in Google Maps
+                  <ArrowRight size={13} strokeWidth={1.8} />
+                </small>
+              </div>
+            </a>
           </div>
 
           {/* =================================================
