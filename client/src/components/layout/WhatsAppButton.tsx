@@ -11,18 +11,18 @@ const WHATSAPP_CONTACTS = [
     message:
       "Halo ABN, saya ingin mendapatkan informasi mengenai ABN Fleet System.",
   },
-  // {
-  //   label: "Customer Support",
-  //   description: "Bantuan dan layanan pelanggan",
-  //   number: "62811447622", //"628xxxxxxxxxx",
-  //   message: "Halo ABN Customer Support, saya membutuhkan bantuan.",
-  // },
-  // {
-  //   label: "Technical Support",
-  //   description: "Bantuan teknis sistem",
-  //   number: "628xxxxxxxxxx",
-  //   message: "Halo ABN Technical Support, saya membutuhkan bantuan teknis.",
-  // },
+  {
+    label: "Customer Support",
+    description: "Bantuan dan layanan pelanggan",
+    number: "62811447622",
+    message: "Halo ABN Customer Support, saya membutuhkan bantuan.",
+  },
+  {
+    label: "Technical Support",
+    description: "Bantuan teknis sistem",
+    number: "62811447622",
+    message: "Halo ABN Technical Support, saya membutuhkan bantuan teknis.",
+  },
 ];
 
 function WhatsAppButton() {
@@ -38,50 +38,57 @@ function WhatsAppButton() {
 
   return (
     <div className="whatsapp-widget">
-      {open && (
-        <div
-          className="whatsapp-menu"
-          role="dialog"
-          aria-label="ABN WhatsApp contacts"
-        >
-          <div className="whatsapp-menu-header">
-            <div>
-              <strong>Chat with ABN</strong>
-              <span>Choose a department</span>
-            </div>
+      {/* =====================================================
+          WHATSAPP MENU
+          ===================================================== */}
+      <div
+        className={`whatsapp-menu ${open ? "is-open" : ""}`}
+        role="dialog"
+        aria-label="ABN WhatsApp contacts"
+        aria-hidden={!open}
+      >
+        <div className="whatsapp-menu-header">
+          <div>
+            <strong>Chat with ABN</strong>
+            <span>Choose a department</span>
+          </div>
 
+          <button
+            type="button"
+            className="whatsapp-close"
+            onClick={() => setOpen(false)}
+            aria-label="Close WhatsApp menu"
+            tabIndex={open ? 0 : -1}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="whatsapp-contacts">
+          {WHATSAPP_CONTACTS.map((contact) => (
             <button
               type="button"
-              className="whatsapp-close"
-              onClick={() => setOpen(false)}
-              aria-label="Close WhatsApp menu"
+              className="whatsapp-contact"
+              key={contact.label}
+              onClick={() => handleWhatsApp(contact.number, contact.message)}
+              tabIndex={open ? 0 : -1}
             >
-              <X size={18} />
+              <span className="whatsapp-contact-icon">
+                <MessageCircle size={20} />
+              </span>
+
+              <span className="whatsapp-contact-info">
+                <strong>{contact.label}</strong>
+                <small>{contact.description}</small>
+              </span>
             </button>
-          </div>
-
-          <div className="whatsapp-contacts">
-            {WHATSAPP_CONTACTS.map((contact) => (
-              <button
-                type="button"
-                className="whatsapp-contact"
-                key={contact.label}
-                onClick={() => handleWhatsApp(contact.number, contact.message)}
-              >
-                <span className="whatsapp-contact-icon">
-                  <MessageCircle size={20} />
-                </span>
-
-                <span className="whatsapp-contact-info">
-                  <strong>{contact.label}</strong>
-                  <small>{contact.description}</small>
-                </span>
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
-      )}
+      </div>
 
+      {/* =====================================================
+          MAIN BUTTON
+          ===================================================== */}
       <button
         type="button"
         className={`whatsapp-button ${open ? "active" : ""}`}
@@ -89,18 +96,19 @@ function WhatsAppButton() {
         aria-label={
           open ? "Close ABN WhatsApp contacts" : "Open ABN WhatsApp contacts"
         }
+        aria-expanded={open}
         title="Contact ABN on WhatsApp"
       >
-        {open ? (
-          <X size={24} strokeWidth={2.2} />
-        ) : (
-          <MessageCircle size={24} strokeWidth={2.2} />
-        )}
+        <span className="whatsapp-button-icon">
+          {open ? (
+            <X size={24} strokeWidth={2.2} />
+          ) : (
+            <MessageCircle size={24} strokeWidth={2.2} />
+          )}
+        </span>
 
         {!open && (
-          <span className="whatsapp-tooltip">
-            {/* Contact ABN on WhatsApp */}
-          </span>
+          <span className="whatsapp-tooltip">Contact ABN on WhatsApp</span>
         )}
       </button>
     </div>

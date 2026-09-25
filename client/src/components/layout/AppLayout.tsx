@@ -7,7 +7,7 @@ import AIChatButton from "./AIChatButton";
 import SupportButton from "./SupportButton";
 import WhatsAppButton from "./WhatsAppButton";
 import ScrollToTopButton from "./ScrollToTopButton";
-
+import SocialMediaButton from "../common/SocialMediaButton";
 import "./AppLayout.css";
 
 function AppLayout() {
@@ -29,6 +29,7 @@ function AppLayout() {
         <AIChatButton />
         <SupportButton />
         <WhatsAppButton />
+        <SocialMediaButton />
         <ScrollToTopButton />
       </div>
     </div>
