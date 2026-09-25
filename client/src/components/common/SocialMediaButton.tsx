@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { XIcon, X } from "lucide-react";
 
 import "./SocialMediaButton.css";
 
@@ -8,7 +8,7 @@ interface SocialLink {
   label: string;
   description: string;
   url: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
 
 /* =========================================================
@@ -91,40 +91,53 @@ const SOCIAL_LINKS: SocialLink[] = [
   {
     id: "instagram",
     label: "Instagram",
-    description: "Follow ABN on Instagram",
-    url: "https://www.instagram.com/",
+    description: "Follow Darson La Tibi on Instagram",
+    url: "https://www.instagram.com/darsonlatibi/",
     icon: <InstagramIcon />,
   },
   {
     id: "facebook",
     label: "Facebook",
-    description: "Connect with ABN on Facebook",
-    url: "https://www.facebook.com/",
+    description: "Connect with Darson La Tibi on Facebook",
+    url: "https://web.facebook.com/darson.la.tibi.2025",
     icon: <FacebookIcon />,
   },
   {
     id: "linkedin",
     label: "LinkedIn",
-    description: "Connect with ABN professionally",
-    url: "https://www.linkedin.com/",
+    description: "Connect with Darson La Tibi professionally",
+    url: "https://www.linkedin.com/in/darson-la-tibi-689242235/",
     icon: <LinkedinIcon />,
   },
   {
     id: "youtube",
     label: "YouTube",
-    description: "Watch ABN videos",
-    url: "https://www.youtube.com/",
+    description: "Watch Darson La Tibi on YouTube",
+    url: "https://www.youtube.com/@darsonlatibi5979",
     icon: <YoutubeIcon />,
   },
   {
     id: "tiktok",
     label: "TikTok",
-    description: "Follow ABN on TikTok",
-    url: "https://www.tiktok.com/",
+    description: "Follow Darson La Tibi on TikTok",
+    url: "https://www.tiktok.com/@darson.la.tibi5",
     icon: <TikTokIcon />,
   },
+  {
+    id: "x",
+    label: "X",
+    description: "Follow Darson La Tibi on X",
+    url: "https://x.com/darsonlatibi",
+    icon: <XIcon />,
+  },
+  {
+    id: "telegram",
+    label: "Telegram",
+    description: "Connect with Darson La Tibi on Telegram",
+    url: "https://t.me/darsonlatibi",
+    icon: <X />,
+  },
 ];
-
 /* =========================================================
    COMPONENT
    ========================================================= */
@@ -134,7 +147,6 @@ function SocialMediaButton() {
 
   const handleSocialClick = (url: string) => {
     window.open(url, "_blank", "noopener,noreferrer");
-
     setOpen(false);
   };
 
