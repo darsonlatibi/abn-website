@@ -4,6 +4,6 @@ import { createSupportPayment } from "../controllers/SupportPaymentController.js
 
 const router = express.Router();
 
-router.post("/support", createSupportPayment);
+router.post("/pay", createSupportPayment);
 
 export default router;

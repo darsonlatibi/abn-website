@@ -56,6 +56,22 @@ const toMoney = (value) => {
  *   customer_phone: "08123456789"
  * }
  * =========================================================
+        const payload = {
+      amount: initialAmount,
+      customer_name: customerName.trim(),
+
+      ...(customerEmail.trim()
+        ? {
+            customer_email: customerEmail.trim(),
+          }
+        : {}),
+
+      ...(customerPhone.trim()
+        ? {
+            customer_phone: customerPhone.trim(),
+          }
+        : {}),
+    };
  */
 export async function createSupportPayment(req, res) {
   try {

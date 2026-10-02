@@ -50,6 +50,8 @@ import OdooUsers from "../pages/odoo/OdooUsers";
 import Checkout from "../pages/checkout/Checkout";
 import ProductsForSale from "../pages/Products/ProductsForSale";
 import Layanan from "../pages/layanan/Layanan";
+import Support from "../pages/support/Support";
+import Clipper from "../pages/Clipper/Clipper";
 
 /* =========================================================
    ABN CORPORATE WEBSITE
@@ -109,12 +111,16 @@ function AppRouter() {
 
         <Route path="/layanan/fleet-management" element={<FleetManagement />} /> */}
 
+        <Route path="/support" element={<Support />} />
+
         <Route path="/layanan/hr" element={<HR />} />
 
         <Route path="/layanan/finance" element={<Finance />} />
         <Route path="/layanan/inventory" element={<Inventory />} />
         <Route path="/layanan/proc" element={<Procurement />} />
         <Route path="/layanan/crm" element={<CRM />} />
+
+        <Route path="/clipper" element={<Clipper />} />
 
         {/* <Route path="/layanan/gps-tracking" element={<GpsTracking />} />
 

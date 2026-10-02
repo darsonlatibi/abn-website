@@ -272,6 +272,15 @@ const getNavigation = (
       //   },
       // ],
     },
+    {
+      label: "Support",
+      path: "/support",
+    },
+
+    {
+      label: "Clipper",
+      path: "/clipper",
+    },
 
     {
       label: "Portfolio",

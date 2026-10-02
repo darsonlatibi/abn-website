@@ -1,6 +1,49 @@
+import axios from "axios";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import api from "../../api/axios";
+
+import type { RootState } from "../../stores/store";
+
+/**
+ * =========================================================
+ * PUBLIC API CONFIGURATION
+ * =========================================================
+ *
+ * Support / Donation:
+ *
+ * - Tidak membutuhkan login
+ * - Tidak membutuhkan access token
+ * - Tidak membutuhkan refresh token
+ * - Tidak menggunakan auth interceptor
+ *
+ * Backend endpoint:
+ *
+ * POST /api/support/pay
+ *
+ * =========================================================
+ */
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5006/api";
+
+/**
+ * =========================================================
+ * PUBLIC AXIOS INSTANCE
+ * =========================================================
+ */
+
+const publicApi = axios.create({
+  baseURL: API_BASE_URL,
+
+  withCredentials: true,
+
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+
+  timeout: 15000,
+});
 
 /**
  * =========================================================
@@ -10,7 +53,7 @@ import api from "../../api/axios";
 
 export interface SupportPaymentRequest {
   amount: number;
-  customer_name?: string;
+  customer_name: string;
   customer_email?: string;
   customer_phone?: string;
 }
@@ -34,6 +77,12 @@ interface SupportPaymentState {
   data: SupportPaymentData | null;
 }
 
+/**
+ * =========================================================
+ * INITIAL STATE
+ * =========================================================
+ */
+
 const initialState: SupportPaymentState = {
   loading: false,
   success: false,
@@ -46,33 +95,62 @@ const initialState: SupportPaymentState = {
  * CREATE SUPPORT PAYMENT
  * =========================================================
  *
- * POST /api/support
+ * PUBLIC PAYMENT
+ *
+ * POST /api/support/pay
+ *
+ * Tidak membutuhkan login.
+ *
+ * =========================================================
  */
+
 export const createSupportPayment = createAsyncThunk<
   SupportPaymentData,
   SupportPaymentRequest,
-  { rejectValue: string }
+  {
+    rejectValue: string;
+  }
 >(
   "supportPayment/createSupportPayment",
-  async (payload, { rejectWithValue }) => {
-    try {
-      const response = await api.post("/support", payload);
 
-      const data = response.data?.data;
+  async (payload, { rejectWithValue }) => {
+    console.log("ABN SUPPORT: Payment payload =>", payload);
+
+    try {
+      console.log("ABN SUPPORT: Creating public payment...");
+
+      const response = await publicApi.post("/support/pay", payload);
+
+      const data = response.data?.data as SupportPaymentData | undefined;
 
       if (!data) {
+        console.error(
+          "ABN SUPPORT: Response tidak memiliki data.",
+          response.data,
+        );
+
         return rejectWithValue("Response pembayaran Support ABN tidak valid.");
       }
 
-      return data;
-    } catch (error: any) {
-      console.error("CREATE SUPPORT PAYMENT ERROR:", error);
+      console.log("ABN SUPPORT: Payment berhasil dibuat.", data);
 
-      return rejectWithValue(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Gagal membuat pembayaran Support ABN.",
-      );
+      return data;
+    } catch (error: unknown) {
+      console.error("ABN SUPPORT: CREATE PAYMENT ERROR:", error);
+
+      if (axios.isAxiosError(error)) {
+        const serverMessage = error.response?.data?.message;
+
+        if (typeof serverMessage === "string") {
+          return rejectWithValue(serverMessage);
+        }
+
+        if (error.message) {
+          return rejectWithValue(error.message);
+        }
+      }
+
+      return rejectWithValue("Gagal membuat pembayaran Support ABN.");
     }
   },
 );
@@ -89,12 +167,24 @@ const supportPaymentSlice = createSlice({
   initialState,
 
   reducers: {
+    /**
+     * -----------------------------------------------------
+     * CLEAR PAYMENT
+     * -----------------------------------------------------
+     */
+
     clearSupportPayment(state) {
       state.loading = false;
       state.success = false;
       state.error = null;
       state.data = null;
     },
+
+    /**
+     * -----------------------------------------------------
+     * CLEAR ERROR
+     * -----------------------------------------------------
+     */
 
     clearSupportPaymentError(state) {
       state.error = null;
@@ -103,11 +193,13 @@ const supportPaymentSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
+
       /**
        * -----------------------------------------------------
        * PENDING
        * -----------------------------------------------------
        */
+
       .addCase(createSupportPayment.pending, (state) => {
         state.loading = true;
         state.success = false;
@@ -120,6 +212,7 @@ const supportPaymentSlice = createSlice({
        * FULFILLED
        * -----------------------------------------------------
        */
+
       .addCase(
         createSupportPayment.fulfilled,
         (state, action: PayloadAction<SupportPaymentData>) => {
@@ -135,6 +228,7 @@ const supportPaymentSlice = createSlice({
        * REJECTED
        * -----------------------------------------------------
        */
+
       .addCase(createSupportPayment.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
@@ -147,7 +241,7 @@ const supportPaymentSlice = createSlice({
 
 /**
  * =========================================================
- * EXPORT ACTIONS
+ * ACTIONS
  * =========================================================
  */
 
@@ -160,16 +254,16 @@ export const { clearSupportPayment, clearSupportPaymentError } =
  * =========================================================
  */
 
-export const selectSupportPaymentLoading = (state: any) =>
+export const selectSupportPaymentLoading = (state: RootState) =>
   state.supportPayment.loading;
 
-export const selectSupportPaymentSuccess = (state: any) =>
+export const selectSupportPaymentSuccess = (state: RootState) =>
   state.supportPayment.success;
 
-export const selectSupportPaymentError = (state: any) =>
+export const selectSupportPaymentError = (state: RootState) =>
   state.supportPayment.error;
 
-export const selectSupportPaymentData = (state: any) =>
+export const selectSupportPaymentData = (state: RootState) =>
   state.supportPayment.data;
 
 /**

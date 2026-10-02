@@ -55,6 +55,18 @@ try {
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
+
+    /*
+     * IMPORTANT:
+     * Allow Whop iframe embedding.
+     */
+    frameguard: false,
+
+    contentSecurityPolicy: {
+      directives: {
+        "frame-ancestors": ["'self'", "https://whop.com", "https://*.whop.com"],
+      },
+    },
   }),
 );
 

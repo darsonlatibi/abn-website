@@ -32,3 +32,6 @@ dist-ssr
 **/* copy.*
 # Backup files
 *.bak
+
+# Temporary support test file
+client/src/pages/support/t.txt

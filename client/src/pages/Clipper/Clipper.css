@@ -1,0 +1,679 @@
+/* =========================================================
+   ABN DIGITAL & INDUSTRIAL TECHNOLOGY
+   CLIPPER / CREATOR CAMPAIGN
+   FOLLOW INBOX.CSS DESIGN SYSTEM
+
+   Master:
+   - Max width       : 1180px
+   - Desktop gutter  : 24px
+   - Border radius   : 14px
+   - Primary color   : #0f766e
+   - Responsive      : 1100 / 900 / 760 / 640 / 480
+   - Dark mode       : [data-theme="dark"]
+   ========================================================= */
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.clipper-page {
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  color: var(--text-primary, #172033);
+  background: var(--background-primary, #ffffff);
+  overflow: hidden;
+}
+
+.clipper-container {
+  width: min(1180px, calc(100% - 48px));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.clipper-hero {
+  position: relative;
+  padding: 92px 0 88px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  background:
+    radial-gradient(
+      circle at 82% 20%,
+      rgba(15, 118, 110, 0.1),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 15% 85%,
+      rgba(20, 184, 166, 0.06),
+      transparent 30%
+    ),
+    var(--background-primary, #ffffff);
+}
+
+.clipper-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(15, 118, 110, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 118, 110, 0.035) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.65), transparent 85%);
+}
+
+.clipper-hero .clipper-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   EYEBROW
+   ========================================================= */
+
+.clipper-eyebrow {
+  width: fit-content;
+  min-height: 30px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  border: 1px solid rgba(15, 118, 110, 0.14);
+  border-radius: 999px;
+  color: #0f766e;
+  background: rgba(15, 118, 110, 0.07);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.clipper-eyebrow svg {
+  flex: 0 0 auto;
+}
+
+/* =========================================================
+   HERO TITLE
+   ========================================================= */
+
+.clipper-hero h1 {
+  max-width: 850px;
+  margin: 22px 0 0;
+  color: var(--text-primary, #172033);
+  font-size: clamp(42px, 6vw, 72px);
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+  font-weight: 850;
+}
+
+.clipper-hero h1 span {
+  display: inline;
+  color: #0f766e;
+}
+
+/* =========================================================
+   HERO DESCRIPTION
+   ========================================================= */
+
+.clipper-hero p {
+  max-width: 720px;
+  margin: 24px 0 0;
+  color: var(--text-secondary, #64748b);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.clipper-actions {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* =========================================================
+   BUTTON
+   ========================================================= */
+
+.clipper-btn {
+  min-height: 44px;
+  padding: 0 17px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
+}
+
+.clipper-btn-primary {
+  border: 1px solid #0f766e;
+  color: #ffffff;
+  background: #0f766e;
+  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.16);
+}
+
+.clipper-btn-primary:hover {
+  border-color: #115e59;
+  color: #ffffff;
+  background: #115e59;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(15, 118, 110, 0.2);
+}
+
+.clipper-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* =========================================================
+   MAIN SECTION
+   ========================================================= */
+
+.clipper-section {
+  padding: 70px 0 90px;
+  box-sizing: border-box;
+  background: var(--background-primary, #ffffff);
+}
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.clipper-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.clipper-card {
+  position: relative;
+  min-width: 0;
+  min-height: 230px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 14px;
+  background: var(--surface-primary, #ffffff);
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.035);
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.clipper-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 2px;
+  border-radius: 0 0 999px 999px;
+  background: #0f766e;
+  opacity: 0.25;
+}
+
+.clipper-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(15, 118, 110, 0.22);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
+}
+
+/* =========================================================
+   CARD ICON
+   ========================================================= */
+
+.clipper-card > svg {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 22px;
+  padding: 10px;
+  box-sizing: content-box;
+  border: 1px solid rgba(15, 118, 110, 0.12);
+  border-radius: 11px;
+  color: #0f766e;
+  background: rgba(15, 118, 110, 0.07);
+}
+
+/* =========================================================
+   CARD TITLE
+   ========================================================= */
+
+.clipper-card h2 {
+  margin: 0;
+  color: var(--text-primary, #172033);
+  font-size: 16px;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+
+/* =========================================================
+   CARD DESCRIPTION
+   ========================================================= */
+
+.clipper-card p {
+  margin: 9px 0 0;
+  color: var(--text-secondary, #64748b);
+  font-size: 11px;
+  line-height: 1.75;
+}
+
+/* =========================================================
+   CARD INTERACTION
+   ========================================================= */
+
+.clipper-card:hover > svg {
+  border-color: rgba(15, 118, 110, 0.22);
+  background: rgba(15, 118, 110, 0.1);
+}
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+[data-theme="dark"] .clipper-page {
+  color: #f8fafc;
+  background: #0b1220;
+}
+
+/* =========================================================
+   DARK HERO
+   ========================================================= */
+
+[data-theme="dark"] .clipper-hero {
+  border-color: rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(
+      circle at 82% 20%,
+      rgba(20, 184, 166, 0.1),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 15% 85%,
+      rgba(20, 184, 166, 0.06),
+      transparent 30%
+    ),
+    #0b1220;
+}
+
+[data-theme="dark"] .clipper-hero::before {
+  background-image:
+    linear-gradient(rgba(94, 234, 212, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 234, 212, 0.035) 1px, transparent 1px);
+}
+
+[data-theme="dark"] .clipper-eyebrow {
+  border-color: rgba(94, 234, 212, 0.14);
+  color: #5eead4;
+  background: rgba(20, 184, 166, 0.08);
+}
+
+[data-theme="dark"] .clipper-hero h1 {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .clipper-hero h1 span {
+  color: #5eead4;
+}
+
+[data-theme="dark"] .clipper-hero p {
+  color: #94a3b8;
+}
+
+/* =========================================================
+   DARK BUTTON
+   ========================================================= */
+
+[data-theme="dark"] .clipper-btn-primary {
+  border-color: #0f766e;
+  color: #ffffff;
+  background: #0f766e;
+  box-shadow: 0 10px 24px rgba(20, 184, 166, 0.12);
+}
+
+[data-theme="dark"] .clipper-btn-primary:hover {
+  border-color: #0d9488;
+  background: #0d9488;
+}
+
+/* =========================================================
+   DARK SECTION
+   ========================================================= */
+
+[data-theme="dark"] .clipper-section {
+  background: #0b1220;
+}
+
+/* =========================================================
+   DARK CARD
+   ========================================================= */
+
+[data-theme="dark"] .clipper-card {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #111827;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .clipper-card::before {
+  background: #5eead4;
+  opacity: 0.2;
+}
+
+[data-theme="dark"] .clipper-card:hover {
+  border-color: rgba(94, 234, 212, 0.18);
+  background: #131d2d;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="dark"] .clipper-card > svg {
+  border-color: rgba(94, 234, 212, 0.12);
+  color: #5eead4;
+  background: rgba(20, 184, 166, 0.08);
+}
+
+[data-theme="dark"] .clipper-card:hover > svg {
+  border-color: rgba(94, 234, 212, 0.22);
+  background: rgba(20, 184, 166, 0.12);
+}
+
+[data-theme="dark"] .clipper-card h2 {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .clipper-card p {
+  color: #94a3b8;
+}
+
+/* =========================================================
+   RESPONSIVE — 1100px
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .clipper-hero {
+    padding: 78px 0 76px;
+  }
+
+  .clipper-hero h1 {
+    max-width: 760px;
+    font-size: clamp(40px, 6vw, 62px);
+  }
+
+  .clipper-card {
+    min-height: 220px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE — 900px
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .clipper-container {
+    width: min(100% - 40px, 1180px);
+  }
+
+  .clipper-hero {
+    padding: 68px 0 66px;
+  }
+
+  .clipper-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .clipper-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE — 760px
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .clipper-container {
+    width: min(100% - 32px, 1180px);
+  }
+
+  .clipper-hero {
+    padding: 58px 0 60px;
+  }
+
+  .clipper-hero h1 {
+    max-width: 680px;
+    font-size: clamp(36px, 8vw, 52px);
+    letter-spacing: -0.045em;
+  }
+
+  .clipper-hero p {
+    max-width: 620px;
+    margin-top: 20px;
+    font-size: 13px;
+  }
+
+  .clipper-actions {
+    margin-top: 26px;
+  }
+
+  .clipper-section {
+    padding: 54px 0 68px;
+  }
+
+  .clipper-grid {
+    gap: 12px;
+  }
+
+  .clipper-card {
+    min-height: 210px;
+    padding: 20px;
+  }
+
+  .clipper-card::before {
+    left: 20px;
+    right: 20px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE — 640px
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .clipper-container {
+    width: min(100% - 28px, 1180px);
+  }
+
+  .clipper-hero {
+    padding: 48px 0 50px;
+  }
+
+  .clipper-eyebrow {
+    min-height: 28px;
+    padding: 0 9px;
+    font-size: 8px;
+  }
+
+  .clipper-hero h1 {
+    margin-top: 18px;
+    font-size: 36px;
+    line-height: 1.05;
+  }
+
+  .clipper-hero p {
+    margin-top: 18px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .clipper-actions {
+    margin-top: 24px;
+  }
+
+  .clipper-btn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .clipper-section {
+    padding: 44px 0 58px;
+  }
+
+  .clipper-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .clipper-card:last-child {
+    grid-column: auto;
+  }
+
+  .clipper-card {
+    min-height: 0;
+    padding: 20px;
+  }
+
+  .clipper-card > svg {
+    margin-bottom: 18px;
+  }
+
+  .clipper-card h2 {
+    font-size: 15px;
+  }
+
+  .clipper-card p {
+    font-size: 10px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE — 480px
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .clipper-container {
+    width: min(100% - 24px, 1180px);
+  }
+
+  .clipper-hero {
+    padding: 38px 0 42px;
+  }
+
+  .clipper-eyebrow {
+    min-height: 26px;
+    font-size: 7px;
+    letter-spacing: 0.1em;
+  }
+
+  .clipper-eyebrow svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .clipper-hero h1 {
+    margin-top: 16px;
+    font-size: 30px;
+    letter-spacing: -0.04em;
+  }
+
+  .clipper-hero p {
+    font-size: 11px;
+    line-height: 1.65;
+  }
+
+  .clipper-actions {
+    margin-top: 20px;
+  }
+
+  .clipper-btn {
+    min-height: 42px;
+    font-size: 11px;
+  }
+
+  .clipper-section {
+    padding: 36px 0 48px;
+  }
+
+  .clipper-card {
+    border-radius: 12px;
+    padding: 18px;
+  }
+
+  .clipper-card::before {
+    left: 18px;
+    right: 18px;
+  }
+
+  .clipper-card > svg {
+    width: 24px;
+    height: 24px;
+    padding: 9px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+  }
+
+  .clipper-card h2 {
+    font-size: 14px;
+  }
+
+  .clipper-card p {
+    margin-top: 7px;
+    font-size: 10px;
+    line-height: 1.65;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+.clipper-btn:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.22);
+  outline-offset: 3px;
+}
+
+[data-theme="dark"] .clipper-btn:focus-visible {
+  outline-color: rgba(94, 234, 212, 0.25);
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .clipper-btn,
+  .clipper-card {
+    transition: none;
+  }
+
+  .clipper-card:hover,
+  .clipper-btn-primary:hover {
+    transform: none;
+  }
+}
