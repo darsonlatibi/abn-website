@@ -22,11 +22,18 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import SupportPaymentRoute from "./routes/SupportPaymentRoute.js";
 
+import aiRoutes from "./routes/aiRoutes.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const clientDist = path.resolve(__dirname, "../../client/dist");
 
 const app = express();
+
+console.log("==============================================");
+console.log(" ABN AI ROUTES LOADING");
+console.log(" AI ROUTE : /api/ai");
+console.log("==============================================");
 
 /* ========================================================= 
 DATABASE / EMAIL TABLE ========================================================= */
@@ -130,6 +137,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/support", SupportPaymentRoute);
+app.use("/api/ai", aiRoutes);
 /* =========================================================
    LOGGER
    ========================================================= */

@@ -4,8 +4,8 @@ const fs = require("fs");
 
 const inputDir = __dirname;
 
-const inputFile = "whop-preview-responsive.svg";
-const outputFile = "whop-preview-responsive.png";
+const inputFile = "abn-single-company-branding.svg";
+const outputFile = "abn-single-company-branding.png";
 
 const WIDTH = 1600;
 const HEIGHT = 900;

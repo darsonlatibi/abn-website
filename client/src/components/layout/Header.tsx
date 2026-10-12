@@ -82,6 +82,7 @@ const getNavigation = (
   const role = user?.role?.toUpperCase();
 
   const canAccessMailbox = role === "ADMIN" || role === "SUPER_ADMIN";
+  const canAccessAI = role === "ADMIN" || role === "SUPER_ADMIN";
 
   return [
     {
@@ -306,6 +307,18 @@ const getNavigation = (
           {
             label: "Mailbox",
             path: "/mail/inbox",
+          },
+        ]
+      : []),
+    /* =====================================================
+   ADMIN ONLY — ABN AI
+   ===================================================== */
+
+    ...(canAccessAI
+      ? [
+          {
+            label: "ABN AI",
+            path: "/ai",
           },
         ]
       : []),

@@ -52,6 +52,7 @@ import ProductsForSale from "../pages/Products/ProductsForSale";
 import Layanan from "../pages/layanan/Layanan";
 import Support from "../pages/support/Support";
 import Clipper from "../pages/Clipper/Clipper";
+import AI from "../pages/AI/AI";
 
 /* =========================================================
    ABN CORPORATE WEBSITE
@@ -184,6 +185,13 @@ function AppRouter() {
           ===================================================== */}
 
       <Route path="*" element={<Navigate to="/" replace />} />
+
+      {/* =================================================
+        ABN AI
+        LOGIN REQUIRED
+        ================================================= */}
+
+      <Route path="/ai" element={<AI />} />
     </Routes>
   );
 }

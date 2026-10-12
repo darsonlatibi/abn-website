@@ -12,7 +12,7 @@ import {
    COOKIE CONFIG
    ========================================================= */
 
-const REFRESH_TOKEN_COOKIE = "abn_website_refresh_token";
+const REFRESH_TOKEN_COOKIE = "abn_tiktok_refresh_token";
 const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 
 const isProduction = process.env.NODE_ENV === "production";

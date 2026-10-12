@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0f766e"/>
+  <rect x="76" y="76" width="360" height="360" rx="64"
+        fill="#0b2530" stroke="#14b8a6" stroke-width="8"/>
+
+  <text x="256" y="245"
+        text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="92"
+        font-weight="700"
+        fill="#ffffff">ABN</text>
+
+  <text x="256" y="310"
+        text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="30"
+        font-weight="600"
+        letter-spacing="4"
+        fill="#5eead4">ENTERPRISE</text>
+
+  <text x="256" y="355"
+        text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="22"
+        letter-spacing="3"
+        fill="#cbd5e1">SINGLE COMPANY</text>
+</svg>
